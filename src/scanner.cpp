@@ -73,6 +73,46 @@ void scanner::scan(void)
 			// Now the string s has been created, and we need to check what it
 			// is exactly. We handle determining whether it is a type, reserved,
 			// or user-defined variable here.
+			int word = -1;
+			for (size_t i = 0; i < RESERVED_SIZE; ++i)
+			{
+				if (s.compare(RESERVED[i]) == 0)
+				{
+					word = (int)i;
+					break;
+				}
+			}
+			
+			if (word >= 0)
+			{
+				token_reserved * tok = new token_reserved();
+				tok->set_word((ReservedWord)word);
+				_tokens.push_back(tok);
+				continue;
+			}
+			
+			int datatype = -1;
+			for (size_t i = 0; i < DATATYPE_SIZE; ++i)
+			{
+				if (s.compare(DATATYPE[i]) == 0)
+				{
+					datatype = (int)i;
+					break;
+				}
+			}
+			
+			if (datatype >= 0)
+			{
+				token_type * tok = new token_type();
+				tok->set_datatype((Datatype)datatype);
+				_tokens.push_back(tok);
+				continue;
+			}
+			
+			token_name * tok = new token_name();
+			tok->set_name(s);
+			_tokens.push_back(tok);
+			continue;
 		}
 		else if (is_numeric(look))
 		{
@@ -100,38 +140,65 @@ void scanner::scan(void)
 			{
 			case '(':
 				{
+					token_symbol * tok = new token_symbol();
+					tok->set_symbol(LParen);
+					_tokens.push_back(tok);
 					break;
 				}
 			case ')':
 				{
+					token_symbol * tok = new token_symbol();
+					tok->set_symbol(RParen);
+					_tokens.push_back(tok);
 					break;
 				}
 			case '{':
 				{
+					token_symbol * tok = new token_symbol();
+					tok->set_symbol(LBrace);
+					_tokens.push_back(tok);
 					break;
 				}
 			case '}':
 				{
+					token_symbol * tok = new token_symbol();
+					tok->set_symbol(RBrace);
+					_tokens.push_back(tok);
 					break;
 				}
 			case ';':
 				{
+					token_symbol * tok = new token_symbol();
+					tok->set_symbol(Semicolon);
+					_tokens.push_back(tok);
 					break;
 				}
 			case ':':
 				{
+					token_symbol * tok = new token_symbol();
+					tok->set_symbol(Colon);
+					_tokens.push_back(tok);
 					break;
 				}
 			case '=':
 				{
+					token_operator * tok = new token_operator();
+					tok->set_operator_type(Equals);
+					_tokens.push_back(tok);
 					break;
 				}
 			case '+':
 				{
+					token_operator * tok = new token_operator();
+					tok->set_operator_type(Plus);
+					_tokens.push_back(tok);
 					break;
 				}
 			default:
 				{
+					token_error * tok = new token_error();
+					tok->set_message(string("Unidentified symbol"));
+					_tokens.push_back(tok);
 					break;
 				}
 			}

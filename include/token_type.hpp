@@ -5,7 +5,13 @@
 
 enum Datatype
 {
-	ErrorType,Void,Int
+	ErrorType=-1,Void=0,Int=1
+};
+
+unsigned int DATATYPE_SIZE = 1;
+const char * DATATYPE[] =
+{
+	"void","int"
 };
 
 class token_type : public token_base

@@ -5,7 +5,13 @@
 
 enum ReservedWord
 {
-	ErrorReserved,Return
+	ErrorReserved=-1,Return=0
+};
+
+unsigned int RESERVED_SIZE = 1;
+const char * RESERVED[] =
+{
+	"return"
 };
 
 class token_reserved : public token_base
