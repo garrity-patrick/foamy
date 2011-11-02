@@ -22,6 +22,14 @@ public:
 	
 	void clear(void);
 	void scan(void);
+
+private:
+	bool is_alphabetic(char c) const;
+	bool is_numeric(char c) const;
+	bool is_alphanumeric(char c) const;
+	bool is_name(char c) const;
+	bool is_whitespace(char c) const;
+	size_t skip_whitespace(size_t position);
 };
 
 #endif

@@ -5,7 +5,7 @@
 
 enum OperatorType
 {
-	ErrorOperator,Plus,Minus,Times,Slash,Equals
+	ErrorOperator,Equals,Plus
 };
 
 class token_operator : public token_base
