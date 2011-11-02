@@ -1,0 +1,40 @@
+#ifndef _TOKEN_ERROR_HPP_
+#define _TOKEN_ERROR_HPP_
+
+#include "token_base.hpp"
+#include <string>
+
+class token_error : public token_base
+{
+private:
+	std::string _message;
+
+public:
+	token_error(void) { _type = Error; }
+	
+	token_error(const std::string & msg) : _message(msg) { _type = Error; }
+	
+	token_error(const token_error & other) : 
+		_message(other._message)
+	{
+		_type = Error;
+	}
+	
+	virtual ~token_error(void) { }
+	
+	token_error & operator=(const token_error & other)
+	{
+		if (this != &other)
+		{
+			_message = other._message;
+		}
+		
+		return *this;
+	}
+	
+	const std::string & message(void) const { return _message; }
+	
+	void set_message(const std::string & msg) { _message = msg; }
+};
+
+#endif
