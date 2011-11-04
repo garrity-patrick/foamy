@@ -8,8 +8,8 @@ enum Datatype
 	ErrorType=-1,Void=0,Int=1
 };
 
-unsigned int DATATYPE_SIZE = 1;
-const char * DATATYPE[] =
+static const unsigned int DATATYPE_SIZE = 2;
+static const char * DATATYPE[] =
 {
 	"void","int"
 };

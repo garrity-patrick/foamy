@@ -43,6 +43,7 @@ void scanner::scan(void)
 	{
 		// Skip any whitespace. We don't care about it.
 		pos = skip_whitespace(pos);
+		if (pos >= end) break;
 		
 		// Get the current character:
 		look = _code[pos];
@@ -73,6 +74,8 @@ void scanner::scan(void)
 			// Now the string s has been created, and we need to check what it
 			// is exactly. We handle determining whether it is a type, reserved,
 			// or user-defined variable here.
+			
+			// Step 1: Check s against reserved words.
 			int word = -1;
 			for (size_t i = 0; i < RESERVED_SIZE; ++i)
 			{
@@ -91,6 +94,7 @@ void scanner::scan(void)
 				continue;
 			}
 			
+			// Step 2: Check s against datatypes (special class of reserved word).
 			int datatype = -1;
 			for (size_t i = 0; i < DATATYPE_SIZE; ++i)
 			{
@@ -109,6 +113,8 @@ void scanner::scan(void)
 				continue;
 			}
 			
+			// The token is not a reserved word or datatype, so it must be a
+			// standard name.
 			token_name * tok = new token_name();
 			tok->set_name(s);
 			_tokens.push_back(tok);
@@ -120,8 +126,8 @@ void scanner::scan(void)
 			string s;
 			while (pos < end)
 			{
-				look = _code[pos++];
-				if (is_numeric(look)) s.push_back(look);
+				look = _code[pos];
+				if (is_numeric(look)) { s.push_back(look); ++pos; } else break;
 			}
 			
 			// Convert our string into a number. This is guaranteed to work,
@@ -140,6 +146,7 @@ void scanner::scan(void)
 			{
 			case '(':
 				{
+					// Left parenthesis
 					token_symbol * tok = new token_symbol();
 					tok->set_symbol(LParen);
 					_tokens.push_back(tok);
@@ -147,6 +154,7 @@ void scanner::scan(void)
 				}
 			case ')':
 				{
+					// Right parenthesis
 					token_symbol * tok = new token_symbol();
 					tok->set_symbol(RParen);
 					_tokens.push_back(tok);
@@ -154,6 +162,7 @@ void scanner::scan(void)
 				}
 			case '{':
 				{
+					// Left brace
 					token_symbol * tok = new token_symbol();
 					tok->set_symbol(LBrace);
 					_tokens.push_back(tok);
@@ -161,6 +170,7 @@ void scanner::scan(void)
 				}
 			case '}':
 				{
+					// Right brace
 					token_symbol * tok = new token_symbol();
 					tok->set_symbol(RBrace);
 					_tokens.push_back(tok);
@@ -168,6 +178,7 @@ void scanner::scan(void)
 				}
 			case ';':
 				{
+					// Semi-colon operator
 					token_symbol * tok = new token_symbol();
 					tok->set_symbol(Semicolon);
 					_tokens.push_back(tok);
@@ -175,6 +186,7 @@ void scanner::scan(void)
 				}
 			case ':':
 				{
+					// Colon operator
 					token_symbol * tok = new token_symbol();
 					tok->set_symbol(Colon);
 					_tokens.push_back(tok);
@@ -182,6 +194,7 @@ void scanner::scan(void)
 				}
 			case '=':
 				{
+					// Assignment operator
 					token_operator * tok = new token_operator();
 					tok->set_operator_type(Equals);
 					_tokens.push_back(tok);
@@ -189,19 +202,30 @@ void scanner::scan(void)
 				}
 			case '+':
 				{
+					// Plus operator
 					token_operator * tok = new token_operator();
 					tok->set_operator_type(Plus);
 					_tokens.push_back(tok);
 					break;
 				}
+			case '#':
+				{
+					// Comment: discard the rest of the line.
+					while (pos < end && look != '\n') look = _code[pos++];
+					break;
+				}
 			default:
 				{
+					// Unidentified symbol / token.
 					token_error * tok = new token_error();
 					tok->set_message(string("Unidentified symbol"));
 					_tokens.push_back(tok);
 					break;
 				}
 			}
+			
+			// Increment our position:
+			++pos;
 		}
 	}
 }
@@ -240,6 +264,6 @@ bool scanner::is_whitespace(char c) const
 
 size_t scanner::skip_whitespace(size_t position)
 {
-	while (position < _code.size() && is_whitespace(_code[position++]));
+	while (position < _code.size() && is_whitespace(_code[position])) position++;
 	return position;
 }

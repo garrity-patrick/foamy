@@ -3,7 +3,7 @@
 
 enum TokenType
 {
-	Error, Type, Reserved, Operator, Symbol, Number, Name
+	Error=-1, Type=0, Reserved=1, Operator=2, Symbol=3, Number=4, Name=5
 };
 
 class token_base

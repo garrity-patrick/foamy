@@ -2,6 +2,13 @@
 #define _SCANNER_HPP_
 
 #include "token_base.hpp"
+#include "token_error.hpp"
+#include "token_type.hpp"
+#include "token_reserved.hpp"
+#include "token_operator.hpp"
+#include "token_symbol.hpp"
+#include "token_number.hpp"
+#include "token_name.hpp"
 #include <vector>
 #include <string>
 

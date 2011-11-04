@@ -5,7 +5,7 @@
 
 enum SymbolType
 {
-	ErrorSymbol,LParen,RParen,LBrace,RBrace,Semicolon,Colon
+	ErrorSymbol=-1,LParen=0,RParen=1,LBrace=2,RBrace=3,Semicolon=4,Colon=5
 };
 
 class token_symbol : public token_base

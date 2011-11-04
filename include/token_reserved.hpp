@@ -8,8 +8,8 @@ enum ReservedWord
 	ErrorReserved=-1,Return=0
 };
 
-unsigned int RESERVED_SIZE = 1;
-const char * RESERVED[] =
+static const unsigned int RESERVED_SIZE = 1;
+static const char * RESERVED[] =
 {
 	"return"
 };
