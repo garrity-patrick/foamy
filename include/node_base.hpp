@@ -9,10 +9,12 @@
 // possible types for the node object
 enum NodeType {
   Error = -1,
+  // numbers 0-9: special types
   Program = 0,
   Function = 1,
+  // numbers 10-19: sequence nodes
   Sequence = 10,
-  Expression = 20
+  Expression = 11
 };
 
 
