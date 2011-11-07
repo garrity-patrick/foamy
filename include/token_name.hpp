@@ -1,3 +1,8 @@
+// token_name.hpp
+// @author Chris Cornelius, Patrick Garrity, Jonathan Sandness                  
+// Created 11/07/2011                                                           
+// Foamy (toy language project) - ProLang course, Fall 2011   
+
 #ifndef _TOKEN_NAME_HPP_
 #define _TOKEN_NAME_HPP_
 

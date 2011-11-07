@@ -1,3 +1,7 @@
+// scanner_driver.hpp
+// @author Pat Garrity
+// Driver to test the scanner for the foamy language.
+
 #include "scanner.hpp"
 #include <string>
 #include <iostream>

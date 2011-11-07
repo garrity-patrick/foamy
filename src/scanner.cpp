@@ -1,3 +1,7 @@
+// scanner.cpp
+// @author Patrick Garrity
+// Implmentations of the scanner class.
+
 #include "scanner.hpp"
 #include "token_error.hpp"
 #include "token_type.hpp"
