@@ -88,8 +88,8 @@ int main(int argc, char ** argv)
 		case 0:
 			{
 				cout << "Type" << endl;
-				cout << "\tDatatype: " << 
-					 reinterpret_cast<const token_type *>(tok)->datatype()
+				cout << "\tFoamy type: " << 
+					 reinterpret_cast<const token_type *>(tok)->ftype()
 					 << endl;
 				break;
 			}

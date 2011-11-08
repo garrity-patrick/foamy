@@ -9,9 +9,19 @@
 #define _FTYPE_T_HPP_
 
 enum ftype_t {
-  Void = NULL,
-  Int = 10
+  ErrorType=-1,
+  Void = 0,
+  Int = 1
 };
+
+static const size_t FTYPE_SIZE = 2;
+static const char* FTYPE[] = 
+  {
+    "void",
+    "int"
+  };
+
+
 
 #endif // _FTYPE_T_HPP_
 

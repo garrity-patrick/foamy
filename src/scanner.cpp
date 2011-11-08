@@ -98,26 +98,26 @@ void scanner::scan(void)
 				continue;
 			}
 			
-			// Step 2: Check s against datatypes (special class of reserved word).
-			int datatype = -1;
-			for (size_t i = 0; i < DATATYPE_SIZE; ++i)
+			// Step 2: Check s against ftypes (special class of reserved word).
+			int ftype = -1;
+			for (size_t i = 0; i < FTYPE_SIZE; ++i)
 			{
-				if (s.compare(DATATYPE[i]) == 0)
+				if (s.compare(FTYPE[i]) == 0)
 				{
-					datatype = (int)i;
+					ftype = (int)i;
 					break;
 				}
 			}
 			
-			if (datatype >= 0)
+			if (ftype >= 0)
 			{
 				token_type * tok = new token_type();
-				tok->set_datatype((Datatype)datatype);
+				tok->set_ftype((ftype_t)ftype);
 				_tokens.push_back(tok);
 				continue;
 			}
 			
-			// The token is not a reserved word or datatype, so it must be a
+			// The token is not a reserved word or ftype, so it must be a
 			// standard name.
 			token_name * tok = new token_name();
 			tok->set_name(s);
