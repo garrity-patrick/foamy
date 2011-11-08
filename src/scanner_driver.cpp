@@ -3,6 +3,7 @@
 // Driver to test the scanner for the foamy language.
 
 #include "scanner.hpp"
+#include "parser.hpp"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -140,6 +141,10 @@ int main(int argc, char ** argv)
 			}
 		}
 	}
+	
+	parser p ( s.tokens() );
+	p.begin_parse();
+	cout << "File Parsed Successfuly" << endl;
 	
 	return 0;
 }
