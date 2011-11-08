@@ -41,6 +41,7 @@ public:
 	SymbolType symbol(void) const { return _symbol; }
 	
 	void set_symbol(SymbolType sym) { _symbol = sym; }
+	
 };
 
 #endif

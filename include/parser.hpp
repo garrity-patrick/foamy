@@ -28,7 +28,6 @@ class parser
 {
 protected:
 	std::vector<token_base *> _tokens;
-	token_base * _look_ahead;
 	int _tokenPos;
 	
 public:
@@ -71,7 +70,6 @@ public:
   	//Check the symbol value of _lookAhead against parameter
 	void parse_symbol(SymbolType);
 	
-  	
   	//Parse a list of parameters in a function
   	void parse_parameter_list();
   	
@@ -94,6 +92,8 @@ public:
   	void token_type_error(TokenType);
   	void symbol_type_error(SymbolType);
   	void operator_type_error(OperatorType);
+  	
+  	
   
 };
 

@@ -40,6 +40,8 @@ public:
 	OperatorType operator_type(void) const { return _operator; }
 	
 	void set_operator_type(OperatorType o) { _operator = o; }
+	
+	
 };
 
 #endif

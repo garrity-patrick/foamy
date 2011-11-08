@@ -33,6 +33,7 @@ public:
 	
 	TokenType type(void) const { return _type; }
 	void set_type(TokenType t) { _type = t; }
+
 };
 
 #endif

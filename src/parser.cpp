@@ -5,7 +5,6 @@
 parser::parser( const std::vector<token_base *>* tokens ){
 	_tokens = *tokens;
 	_tokenPos = 0;
-	_look_ahead = _tokens[_tokenPos];
 }
 
 parser::~parser(){
@@ -18,39 +17,72 @@ token_base * parser::cur_token(){
 		std::cout << "Unexpected End Of File" << std::endl;
 		exit(1);
 	}
-	return _look_ahead;
+	return _tokens[ _tokenPos ];
 }
 
+const char * get_type_string(TokenType type){
+	switch(type){
+		case Error:		return "'Error'";
+		case Type:		return "'Type'";
+		case Reserved:	return "'Reserved'";
+		case Operator:	return "'Operator'";
+		case Symbol:	return "'Symbol'";
+		case Number:	return "'Number'";
+		case Name:		return "'Name'";
+		default: 		return "No-Matching-Type";
+	}
+}
+	
+const char * get_operator_string(OperatorType type){
+	switch(type){
+		case ErrorOperator:	return "'ErrorOperator'";
+		case Equals:		return "'Equals'";
+		case Plus:			return "'Plus'";
+		default:			return "'No-Matching-Operator'";
+	}
+}
+
+const char * get_symbol_string(SymbolType type){
+	switch(type){
+		case ErrorOperator:	return "'ErrorSymbol'";
+		case LParen:		return "'LParen'";
+		case RParen:		return "'RParen'";
+		case LBrace:		return "'LBrace'";
+		case RBrace:		return "'RBrace'";
+		case Semicolon:		return "'Semicolon'";
+		case Colon:			return "'Colon'";
+		default:			return "'No-Matching-Symbol'";
+	}
+}
+
+
+
+//Error=-1, Type=0, Reserved=1, Operator=2, Symbol=3, Number=4, Name=5
 //Functions used to signal errors
 void parser::token_type_error(TokenType expected){
-	std::cout << "Token Type Error.  Expected " << expected << " Received: " 
-	<< cur_token()->type() << std::endl;
+	std::cout << "Token Type Error.  Expected " << get_type_string(expected) << " Received: "
+		<< get_type_string( cur_token()->type() ) << std::endl;
 	exit(1);
 }
-
+//reinterpret_cast<const token_symbol *>( cur_token() )->get_symbol_string()
 void parser::symbol_type_error(SymbolType expected ){
-	std::cout << "Error.  Expected SymbolType:" << expected << 
-		" Received: " << 
-		reinterpret_cast<const token_symbol *>( cur_token() )->symbol()
-		 << std::endl;
+	std::cout << "Error.  Expected SymbolType: " << get_symbol_string( expected ) << " Received: "
+		<< get_symbol_string ( reinterpret_cast<const token_symbol *>( cur_token() )->symbol() )
+		<< std::endl;
 	exit(1);
 }
 
 void parser::operator_type_error(OperatorType expected){
-	std::cout << "Error.  Expected OperatorType:" << expected << 
-		" Received: " << 
-		reinterpret_cast<const token_operator *>( cur_token() )->operator_type()
-		 << std::endl;
+	std::cout << "Error.  Expected OperatorType:" << get_operator_string( expected ) << " Received: "
+		<< get_operator_string( reinterpret_cast<const token_operator *>( cur_token() )->operator_type() )
+		<< std::endl;
 	exit(1);
 }
 
 
 //Function to advance the token
 void parser::next_token(){
-	
 	_tokenPos ++;
-	_look_ahead = _tokens[_tokenPos];
-	
 }
 
 //Functions to check types, not parse
@@ -70,7 +102,8 @@ bool parser::check_symbol( SymbolType desiredSymbol ){
 
 bool parser::check_operator( OperatorType desiredOperator ){
 	if	( 	check_type( Operator ) && 
-			reinterpret_cast<const token_operator *>( cur_token() )->operator_type() == desiredOperator)
+			reinterpret_cast<const token_operator *>( cur_token() )->operator_type() == desiredOperator
+		)
 		return true;
 	return false;
 }
@@ -191,17 +224,17 @@ bool parser::parse_statement(){
 	switch( cur_token()->type() ){
 		case Type:
 			//For now, only variable definitions will begin with type in a statement
-			parse_variable_declaration();
-			parse_symbol( Semicolon );
+			parse_variable_declaration();	//x:int = 5;
+			parse_symbol( Semicolon );		//;
 			return false;
 			break;
 		case Name:
-			parse_name_statement();
-			parse_symbol( Semicolon );
+			parse_name_statement();			//x = 5;
+			parse_symbol( Semicolon );		//;
 			return false;
 			break;
 		case Reserved:
-			parse_reserved_statement();
+			parse_reserved_statement();		//return(5);
 			parse_symbol( Semicolon );
 			return true;
 			break;
