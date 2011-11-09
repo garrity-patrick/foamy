@@ -22,8 +22,10 @@ public:
     _src = _dest = NULL;
   }
 
-  // TODO: parameter-based constructor
-  // exp_XXX(exp_base* next, PARAMS) : exp_base(next) {
+  exp_assign(exp_base* next, exp_base* src, exp_base* dest) : exp_base(next) {
+    _exptype = Assign;
+    _src = src; _dest = dest;
+  }
 
   exp_assign(const exp_assign& src) : exp_base(src) {
     _src = src._src;

@@ -22,9 +22,11 @@ public:
     _args = NULL;
   }
 
-  // TODO: parameter-based constructor
-  // exp_XXX(exp_base* next, PARAMS) : exp_base(next) {
-  
+  exp_call(exp_base* next, fident_t f, exp_base* args) : exp_base(next) {
+    _exptype = Call;
+    _args = args;  _fident = f;
+  }
+
   exp_call(const exp_call& src) : exp_base(src) {
     _fident = src._fident;
     _args = src._args;  // TODO: should this be a shallow or deep copy?

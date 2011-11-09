@@ -18,13 +18,17 @@ protected:
 public:
   // constructors, destructors
   exp_const() : exp_base() {
+    _exptype = Const;
     _ftype = Void;
   }
 
-  // TODO: parameter-based constructor
-  // exp_XXX(exp_base* next, PARAMS) : exp_base(next) {
+  exp_const(exp_base* next, ftype_t ft) : exp_base(next) {
+    _exptype = Const;
+    _ftype = ft;
+  }
   
   exp_const(const exp_const& src) : exp_base(src) {
+    _exptype = Const;
     _ftype = src._ftype;
   }
   

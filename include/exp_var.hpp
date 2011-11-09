@@ -21,8 +21,10 @@ public:
     _exptype = Var;
   }
   
-  // TODO: parameter-based constructor
-  // exp_XXX(exp_base* next, PARAMS) : exp_base(next) {
+  exp_XXX(exp_base* next, ftype_t ft, fident_t fi) : exp_base(next) {
+    _exptype = Var;
+    _ftype = ft;  _fident = fi;
+  }
 
   exp_var(const exp_var& src) : exp_base(src) {
     _ftype = src._ftype;

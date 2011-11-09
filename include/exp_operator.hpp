@@ -32,8 +32,10 @@ public:
     _lexp = _rexp = NULL;
   }
 
-  // TODO: parameter-based constructor
-  // exp_XXX(exp_base* next, PARAMS) : exp_base(next) {
+  exp_operator(exp_base* next, OperatorType op, exp_base* lexp, exp_base* rexp) : exp_base(next) {
+    _exptype = Operator;
+    _optype = op;  _lexp = lexp;  _rexp = rexp;
+  }
   
   exp_operator(const exp_operator& src) : exp_base(src) {
     _optype = src._optype;

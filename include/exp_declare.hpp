@@ -21,8 +21,10 @@ public:
     _var = NULL;
   }
 
-  // TODO: parameter-based constructor
-  // exp_XXX(exp_base* next, PARAMS) : exp_base(next) {
+  exp_declare(exp_base* next, exp_var* var) : exp_base(next) {
+    _exptype = Declare;
+    _var = var;
+  }
   
   exp_declare(exp_var* v) : exp_base() {
     _exptype = Declare;
