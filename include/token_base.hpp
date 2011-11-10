@@ -1,3 +1,8 @@
+// token_base.hpp
+// @author Chris Cornelius, Patrick Garrity, Jonathan Sandness                  
+// Created 11/07/2011                                                           
+// Foamy (toy language project) - ProLang course, Fall 2011
+
 #ifndef _TOKEN_BASE_HPP_
 #define _TOKEN_BASE_HPP_
 
@@ -28,6 +33,7 @@ public:
 	
 	TokenType type(void) const { return _type; }
 	void set_type(TokenType t) { _type = t; }
+
 };
 
 #endif

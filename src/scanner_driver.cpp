@@ -1,4 +1,9 @@
+// scanner_driver.hpp
+// @author Pat Garrity
+// Driver to test the scanner for the foamy language.
+
 #include "scanner.hpp"
+#include "parser.hpp"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -83,8 +88,8 @@ int main(int argc, char ** argv)
 		case 0:
 			{
 				cout << "Type" << endl;
-				cout << "\tDatatype: " << 
-					 reinterpret_cast<const token_type *>(tok)->datatype()
+				cout << "\tFoamy type: " << 
+					 reinterpret_cast<const token_type *>(tok)->ftype()
 					 << endl;
 				break;
 			}
@@ -136,6 +141,10 @@ int main(int argc, char ** argv)
 			}
 		}
 	}
+	
+	parser p ( s.tokens() );
+	p.begin_parse();
+	cout << "File Parsed Successfuly" << endl;
 	
 	return 0;
 }

@@ -1,3 +1,8 @@
+// token_error.hpp
+// @author Chris Cornelius, Patrick Garrity, Jonathan Sandness                  
+// Created 11/07/2011                                                           
+// Foamy (toy language project) - ProLang course, Fall 2011   
+
 #ifndef _TOKEN_ERROR_HPP_
 #define _TOKEN_ERROR_HPP_
 

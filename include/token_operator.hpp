@@ -1,3 +1,8 @@
+// token_operator.hpp
+// @author Chris Cornelius, Patrick Garrity, Jonathan Sandness                  
+// Created 11/07/2011                                                           
+// Foamy (toy language project) - ProLang course, Fall 2011   
+
 #ifndef _TOKEN_OPERATOR_HPP_
 #define _TOKEN_OPERATOR_HPP_
 
@@ -35,6 +40,8 @@ public:
 	OperatorType operator_type(void) const { return _operator; }
 	
 	void set_operator_type(OperatorType o) { _operator = o; }
+	
+	
 };
 
 #endif
