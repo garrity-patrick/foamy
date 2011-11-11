@@ -18,6 +18,8 @@ using namespace std;
 #include "exp_call.hpp"
 #include "exp_const.hpp"
 #include "exp_declare.hpp"
+#include "exp_declarefunc.hpp"
+#include "exp_operator.hpp"
 
 int main()
 {

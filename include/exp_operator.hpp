@@ -9,13 +9,13 @@
 #include "exp_base.hpp"
 
 enum OperatorType {
-  Error = -1,
+  OpError = -1,
   EqualsEquals = 0,
   Plus = 1,
   Minus = 2,
   Greater = 3,
   Less = 4
-}
+};
 
 class exp_operator : public exp_base
 {
@@ -28,7 +28,7 @@ public:
   // constructors, destructors
   exp_operator() : exp_base() {
     _exptype = Operator;
-    _optype = Error;
+    _optype = OpError;
     _lexp = _rexp = NULL;
   }
 
@@ -43,7 +43,7 @@ public:
     _rexp = src._rexp;
   }
   
-  ~exp_operator() : ~exp_base() {
+  ~exp_operator() {
     if(_lexp) delete _lexp;
     if(_rexp) delete _rexp;
   }
@@ -55,12 +55,12 @@ public:
   exp_base* lexp() { return _lexp; }
   exp_base* rexp() { return _rexp; }
 
-  void set_lexp(const exp_base* l) {
+  void set_lexp(exp_base* l) {
     if(_lexp) delete _lexp;
     _lexp = l;
   }
   
-  void set_rexp(const exp_base* r) {
+  void set_rexp(exp_base* r) {
     if(_rexp) delete _rexp;
     _rexp = r;
   }

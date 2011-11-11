@@ -27,17 +27,16 @@ public:
   }
 
   exp_declarefunc(const exp_declarefunc& src) : exp_base(src) {
-    _arg = src._arg;
+    _func = src._func;
   }
   
-  ~exp_declarefunc() : ~exp_base() {
+  ~exp_declarefunc() {
     if(_func) delete _func;
   }
   
   // accessors
   node_function* func() { return _func; }
-  void set_func(const node_function* f) { _func = f; }
-  
+  void set_func(node_function* f) { _func = f; }
 };
 
 #endif // _EXP_DECLAREFUNC_HPP_
