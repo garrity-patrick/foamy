@@ -20,7 +20,7 @@ public:
     _exptype = Var;
   }
   
-  exp_XXX(exp_base* next, fident_t n) : exp_base(next) {
+  exp_var(exp_base* next, fident_t n) : exp_base(next) {
     _exptype = Var;
     _name = n;
   }
@@ -29,12 +29,23 @@ public:
     _name = src._name;
   }
   
-  ~exp_var() : ~exp_base() { }
+  ~exp_var() { }
   
   // accessors
   fident_t name() { return _name; }
   void set_name(const fident_t n) { _name = n; }
   
+  
+  
+  
+
+  // functions for printing
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os << "exp_var " << _name;
+    return os;
+  }
+
+
 };
 
 #endif // _EXP_VAR_HPP_

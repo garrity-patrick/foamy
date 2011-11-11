@@ -29,17 +29,30 @@ public:
     _arg = src._arg;
   }
   
-  ~exp_return() : ~exp_base() {
+  ~exp_return() {
     if(_arg) delete _arg;
   }
   
   // accessors
   exp_base* arg() { return _arg; }
-  void set_arg(const exp_base* a) {
+  void set_arg(exp_base* a) {
     if(_arg) delete _arg;
     _arg = a;
   }
   
+
+  // overriding function for printing
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os << "exp_return";
+  }
+
+  // overriding function for printing
+  virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth) {
+    os << endl;
+    if(_arg) _arg->printRec(os, depth+1);
+  }
+
+
 };
 
 #endif // _EXP_RETURN_HPP_

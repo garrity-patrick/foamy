@@ -32,18 +32,36 @@ public:
     _args = src._args;  // TODO: should this be a shallow or deep copy?
   }
   
-  ~exp_call() : ~exp_base() {
+  ~exp_call() {
     if(_args) delete _args;
   }
   
   // accessors
   fident_t fident() { return _fident; }
-  void set_fident(const fident_t f) { _fident = f; }
+  void set_fident(fident_t f) { _fident = f; }
   exp_base* args() { return _args; }
-  void set_args(const exp_base* a) {
+  void set_args(exp_base* a) {
 	if(_args) delete _args;
 	_args = a;
 	}
+
+  // prints just the name of this expression, any vital info
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os <<"exp_call " << fident();
+    return os;    
+  }
+
+  // recursively prints the members of an expression
+  virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth=0) {
+    
+    os<< endl;
+    print_spaces(os, depth+1); os << "Call: " << fident() << " ";
+    if(_args) os << endl;
+    if(_args) _args->printRec(os, depth+1);
+    
+    return os;
+  }
+
 
 };
 

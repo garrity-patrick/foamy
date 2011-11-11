@@ -22,7 +22,7 @@ public:
     _src = _dest = NULL;
   }
 
-  exp_assign(exp_base* next, exp_base* src, exp_base* dest) : exp_base(next) {
+  exp_assign(exp_base* next, exp_base* src, exp_var* dest) : exp_base(next) {
     _exptype = Assign;
     _src = src; _dest = dest;
   }
@@ -32,22 +32,43 @@ public:
     _dest = src._dest;
   }
   
-  ~exp_assign() : ~exp_base() {
-    if(src) delete src;
-    if(dest) delete dest;
+  ~exp_assign() {
+    if(_src) delete _src;
+    if(_dest) delete _dest;
   }
   
   // accessors
   exp_base* src() { return _src; }
-  void set_src(const exp_base* s) {
+  void set_src(exp_base* s) {
 	if(_src) delete _src;
 	_src = s;
 	}
   exp_var* dest() { return _dest; }
-  void set_dest(const exp_var* d) {
+  void set_dest(exp_var* d) {
 	if(_dest) delete _dest;
 	_dest = d;
 	}
+
+
+
+  // functions for printing
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os << "exp_assign";
+    return os;
+  }
+
+  virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth=0) {
+
+    os << endl;
+
+    if(_dest) _dest->printRec(os, depth+1);
+    os << " = ";
+    os << endl;
+    if(_src) _src->printRec(os, depth+1);
+
+    return os;    
+  }
+  
   
 };
 

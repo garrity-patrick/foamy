@@ -20,7 +20,6 @@ public:
   // constructors, destructors
   exp_declare() : exp_base() {
     _exptype = Declare;
-    _var = NULL;
   }
 
   exp_declare(exp_base* next, ftype_t type, fident_t name) : exp_base(next) {
@@ -40,7 +39,7 @@ public:
     _name = src._name;
   }
   
-  ~exp_declare() : ~exp_base() { }
+  ~exp_declare() { }
   
   // accessors
   ftype_t type() { return _type; }

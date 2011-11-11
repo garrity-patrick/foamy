@@ -13,16 +13,15 @@
 enum ftype_t {
   ErrorType=-1,
   Void = 0,
-  Int = 1
+  Int=1
 };
 
-static const size_t FTYPE_SIZE = 2;
-static const char* FTYPE[] = 
-  {
-    "void",
-    "int"
-  };
+const char* FTYPE[] = {
+"void",
+"int"
+};
 
+const unsigned int FTYPE_SIZE = 2;
 
 /* TODO: reinstate if needed
 static const char* ftype_name(const ftype_t f)

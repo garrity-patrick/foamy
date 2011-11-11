@@ -12,7 +12,7 @@ using std::ostream;
 using std::string;
 
 // 11/10/11 - General use ... only need bigger class if needs expand
-typedef fident_t string;
+typedef string fident_t;
 
 /* Commented out 11/10/11 because full class functionality is not needed
 class fident_t

@@ -6,11 +6,13 @@
 #define _NODE_FUNCTION_HPP_
 
 #include "node_base.hpp"
-#include "node_seqnode.hpp"
+#include "exp_base.hpp"
 #include "ftype_t.hpp"
 #include "fident_t.hpp"
-#include <list>
-using std::list;
+#include "util.hpp"
+
+#include <vector>
+using std::vector;
 using std::size_t;
 
 
@@ -21,7 +23,7 @@ struct func_arg {
   
   func_arg() : name() { type = Void; }
   func_arg(ftype_t t, fident_t n) : name(n) { type = t; }
-}
+};
 
 
 
@@ -29,49 +31,82 @@ struct func_arg {
 class node_function : public node_base
 {
 protected:
-  node_base* _id;          // identifier for this function
-  node_base* _ret;         // return type
-  list <func_arg> _args; // arguments to the function
-  node_seqnode* _body;     // pointer to first element in body of function
+  fident_t _name;          // identifier for this function
+  ftype_t _rettype;         // return type
+  vector <func_arg> _args; // arguments to the function
+  exp_base* _body;     // pointer to first element in body of function
   
   void init() {
     _type = Function;
-    _ret = NULL;
-    _id = NULL;
+    _rettype = Void;
+    _body = NULL;
   }
   
 public:
   // constructors, destructors
   node_function(void) { init(); }
-  node_function(node_base* id, node_base* ret, list<node_base*> args, node_base* body){
-    init();  _id = id;  _ret = ret;  _args = args;  _body = body;
+  node_function(fident_t name, ftype_t ret, vector<func_arg> args, exp_base* body){
+    init();  _name = name;  _rettype = ret;  _args = args;  _body = body;
   }
   node_function(const node_function& src) { this->operator=(src); }
   node_function& operator=(const node_function& src)
   {
     init();
+    _name = src._name;
     _args = src._args;
-    _ret = src.ret;
+    _rettype = src._rettype;
+    _body = src._body;
   }
 
   ~node_function(void)
   {
-    for (size_t i = 0; i < _args.size(); i++) { delete _args[i]; }
-    delete _id;  delete _ret;  delete _body;
+    //for (size_t i = 0; i < _args.size(); i++) { delete _args[i]; }
+    delete _body;
   }
   
   // accessor methods
-  node_base* ret() { return _ret; }
-  void set_ret(const node_base* r) { _ret = r; }
-  node_base* id() { return _id; }
-  void set_id(const node_base* i) { _id = i; }
-  node_seqnode* body() { return _body; }
-  void set_body(const node_seqnode* b) { _body = b; }
+  ftype_t rettype() { return _rettype; }
+  void set_rettype(const ftype_t t) { _rettype = t; }
+  fident_t name() { return _name; }
+  void set_name(const fident_t i) { _name = i; }
+  exp_base* body() { return _body; }
+  void set_body(exp_base* b) { _body = b; }
   
-  list<func_arg> args(void) { return _args; }
-  void set_args(const list<func_arg> a) { _args = a; }
+  vector<func_arg> args(void) { return _args; }
+  void set_args(const vector<func_arg> a) { _args = a; }
+  
+  // functions for printing
+  virtual std::ostream& printShort(std::ostream& os) {
+    os << "(function: " << _name << " ";
+    os << "type: " << _rettype << " ";
+    os << ")";
+    return os;
+  }
+  virtual std::ostream& printLong(std::ostream& os) {
+    os << "(function: " << _name << " ";
+    os << "type: " << _rettype << " ";
+    os << "args: ";
+    for(unsigned i = 0; i<_args.size(); ++i) os<<_args[i].name << " "; 
+    os << ")";
+    return os;
+  }
+  virtual std::ostream& printRec(std::ostream& os, unsigned depth=0) {
+    print_spaces(os, depth);
+    os << "(function: " << _name << " ";
+    os << "type: " << _rettype << " ";
+    os << "args: ";
+    for(unsigned i = 0; i<_args.size(); ++i) os<<_args[i].name << " ";
+    os << endl;
 
+    // recur on _body
+    if(_body) _body->printRec(os, depth+1);
 
+    os << endl;
+    print_spaces(os, depth);    os << ")";
+    return os;
+  }
+  
+  
   
 };
 

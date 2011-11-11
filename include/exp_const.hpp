@@ -35,13 +35,19 @@ public:
     _val = src._val;
   }
   
-  ~exp_const() : ~exp_base() { }
+  ~exp_const() { }
   
   // accessors
   ftype_t ftype() { return _ftype; }
   void set_ftype(const ftype_t& f) { _ftype = f; }
   int val() { return _val; }
   void set_val(const int v) { _val = v; }
+
+   // prints just the name of this expression, any vital info
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os <<"exp_const " << ftype() << " " << val();
+    return os;
+  }
 
 };
 
