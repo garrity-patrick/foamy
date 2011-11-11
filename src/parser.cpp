@@ -1,6 +1,6 @@
 #include "parser.hpp"
 #include <iostream>
-
+#include <cstdlib>
 
 parser::parser( const std::vector<token_base *>* tokens ){
 	_tokens = *tokens;

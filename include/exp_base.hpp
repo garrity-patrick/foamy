@@ -16,8 +16,10 @@ enum ExpType {
   Const = 1,
   Operator = 10,
   Declare = 11,
-  Assign = 12,
-  Call = 13
+  DeclareFunc = 12,
+  Assign = 13,
+  Call = 14,
+  Return = 15  
 };
 
 

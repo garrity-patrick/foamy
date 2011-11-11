@@ -7,9 +7,23 @@
 
 #include "node_base.hpp"
 #include "node_seqnode.hpp"
+#include "ftype_t.hpp"
+#include "fident_t.hpp"
 #include <list>
 using std::list;
 using std::size_t;
+
+
+// struct to hold arguments to a function
+struct func_arg {
+  ftype_t type;
+  fident_t name;
+  
+  func_arg() : name() { type = Void; }
+  func_arg(ftype_t t, fident_t n) : name(n) { type = t; }
+}
+
+
 
 // represents a function in the abstract syntax tree
 class node_function : public node_base
@@ -17,7 +31,7 @@ class node_function : public node_base
 protected:
   node_base* _id;          // identifier for this function
   node_base* _ret;         // return type
-  list <node_base*> _args; // arguments to the function
+  list <func_arg> _args; // arguments to the function
   node_seqnode* _body;     // pointer to first element in body of function
   
   void init() {
@@ -54,7 +68,8 @@ public:
   node_seqnode* body() { return _body; }
   void set_body(const node_seqnode* b) { _body = b; }
   
-  list<node_base*>& argsList(void) { return _args; }
+  list<func_arg> args(void) { return _args; }
+  void set_args(const list<func_arg> a) { _args = a; }
 
 
   

@@ -12,8 +12,7 @@
 class exp_var : public exp_base
 {
 protected:
-  ftype_t _ftype;
-  fident_t _fident;
+  fident_t _name;
 
 public:
   // constructors, destructors
@@ -21,24 +20,20 @@ public:
     _exptype = Var;
   }
   
-  exp_XXX(exp_base* next, ftype_t ft, fident_t fi) : exp_base(next) {
+  exp_XXX(exp_base* next, fident_t n) : exp_base(next) {
     _exptype = Var;
-    _ftype = ft;  _fident = fi;
+    _name = n;
   }
 
   exp_var(const exp_var& src) : exp_base(src) {
-    _ftype = src._ftype;
-    _fident = src._fident;
+    _name = src._name;
   }
   
   ~exp_var() : ~exp_base() { }
   
   // accessors
-  ftype_t ftype() { return _ftype; }
-  fident_t fident() { return _fident; }
-  
-  void set_ftype(const ftype_t ft) { _ftype = ft; }
-  void set_fident(const fident_t fi) { _fident = fi; }
+  fident_t name() { return _name; }
+  void set_name(const fident_t n) { _name = n; }
   
 };
 

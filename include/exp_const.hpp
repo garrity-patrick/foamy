@@ -13,23 +13,26 @@ class exp_const : public exp_base
 {
 protected:
   ftype_t _ftype;
-  // TODO: implement _val field
+  int _val;
   
 public:
   // constructors, destructors
   exp_const() : exp_base() {
     _exptype = Const;
     _ftype = Void;
+    _val = 0;
   }
 
-  exp_const(exp_base* next, ftype_t ft) : exp_base(next) {
+  exp_const(exp_base* next, ftype_t ft, int val) : exp_base(next) {
     _exptype = Const;
     _ftype = ft;
+    _val = val;
   }
   
   exp_const(const exp_const& src) : exp_base(src) {
     _exptype = Const;
     _ftype = src._ftype;
+    _val = src._val;
   }
   
   ~exp_const() : ~exp_base() { }
@@ -37,7 +40,9 @@ public:
   // accessors
   ftype_t ftype() { return _ftype; }
   void set_ftype(const ftype_t& f) { _ftype = f; }
-  
+  int val() { return _val; }
+  void set_val(const int v) { _val = v; }
+
 };
 
 #endif // _EXP_CONST_HPP_

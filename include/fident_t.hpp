@@ -11,6 +11,10 @@ using std::ostream;
 #include <string>
 using std::string;
 
+// 11/10/11 - General use ... only need bigger class if needs expand
+typedef fident_t string;
+
+/* Commented out 11/10/11 because full class functionality is not needed
 class fident_t
 {
 protected:
@@ -52,7 +56,7 @@ ostream& operator<<(ostream& os, fident_t& f)
 {
   os << _name;
   return os;
-}
+}*/
 
 
 #endif // _FIDENT_T_HPP_
