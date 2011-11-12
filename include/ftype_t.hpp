@@ -16,7 +16,7 @@ enum ftype_t {
   Int=1
 };
 
-const char* FTYPE[] = {
+static const char* FTYPE[] = {
 "void",
 "int"
 };

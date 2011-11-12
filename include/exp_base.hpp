@@ -111,7 +111,7 @@ public:
     os<<"(";
     printExpHead(os);
     // indicate whether or not this expression is chained
-    if(_next != NULL) os << " ...";
+    //    if(_next != NULL) os << " ...";
 
     printExpMembers(os, depth);
 

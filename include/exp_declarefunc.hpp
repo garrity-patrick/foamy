@@ -37,6 +37,21 @@ public:
   // accessors
   node_function* func() { return _func; }
   void set_func(node_function* f) { _func = f; }
+  
+    // functions for printing
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os << "exp_declarefunc " ;
+    return os;
+  }
+
+    // recursively prints the members of an expression
+  virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth=0) {
+    
+    os<< endl;
+    if(_func) _func->printRec(os, depth+1);
+    
+    return os;
+  }
 };
 
 #endif // _EXP_DECLAREFUNC_HPP_

@@ -32,3 +32,5 @@ bin/scanner: build/scanner_driver.o build/scanner.o build/parser.o
 
 bin/printer: .PHONY
 	$(CC) -Iinclude -o bin/printer src/printer_driver.cpp
+	clear
+	bin/printer

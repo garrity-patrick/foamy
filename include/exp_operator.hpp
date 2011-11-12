@@ -64,6 +64,33 @@ public:
     if(_rexp) delete _rexp;
     _rexp = r;
   }
+
+
+  // functions for printing
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os << "exp_operator ";
+    switch(_optype){
+    case OpError: os << "Operator Type Error"; break;
+    case EqualsEquals: os << "=="; break;
+    case Plus: os << "+"; break;
+    case Minus: os << "-"; break;
+    case Greater: os << ">"; break;
+    case Less: os << "<"; break;
+    default: os << "Unknown optype"; break;
+    }
+    return os;
+  }
+
+  virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth=0) {
+
+    os << endl;
+
+    if(_lexp) _lexp->printRec(os,depth+1);
+    if(_rexp) os << endl;
+    if(_rexp) _rexp->printRec(os, depth+1);
+    
+    return os;    
+  }
   
 };
 
