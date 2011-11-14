@@ -13,11 +13,11 @@
 #include "token_symbol.hpp"
 #include "token_number.hpp"
 #include "token_name.hpp"
+
 #include "fident_t.hpp"
 #include "ftype_t.hpp"
 
 #include <vector>
-
 
 #include "exp_base.hpp"
 #include "exp_assign.hpp"
@@ -28,7 +28,6 @@
 #include "exp_operator.hpp"
 #include "exp_return.hpp"
 #include "exp_var.hpp"
-
 
 class parser
 {
@@ -65,7 +64,7 @@ public:
   	fident_t parse_name();
   	
   	//Parse a reserved word
-  	fident_t parse_reserved();
+  	ReservedWord parse_reserved();
   	
   	//Check the operator value of _lookAhead against parameter
   	exp_operator * parse_operator( OperatorType );

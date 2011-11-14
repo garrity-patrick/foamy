@@ -67,14 +67,14 @@ void parser::token_type_error(TokenType expected){
 //reinterpret_cast<const token_symbol *>( cur_token() )->get_symbol_string()
 void parser::symbol_type_error(SymbolType expected ){
 	std::cout << "Error.  Expected SymbolType: " << get_symbol_string( expected ) << " Received: "
-		<< get_symbol_string ( reinterpret_cast<const token_symbol *>( cur_token() )->symbol() )
+		<< get_symbol_string ( dynamic_cast<const token_symbol *>( cur_token() )->symbol() )
 		<< std::endl;
 	exit(1);
 }
 
 void parser::operator_type_error(OperatorType expected){
 	std::cout << "Error.  Expected OperatorType:" << get_operator_string( expected ) << " Received: "
-		<< get_operator_string( reinterpret_cast<const token_operator *>( cur_token() )->operator_type() )
+		<< get_operator_string( dynamic_cast<const token_operator *>( cur_token() )->operator_type() )
 		<< std::endl;
 	exit(1);
 }
@@ -94,7 +94,7 @@ bool parser::check_type( TokenType desiredType ){
 
 bool parser::check_symbol( SymbolType desiredSymbol ){
 	if	( 	check_type( Symbol ) &&
-			reinterpret_cast<const token_symbol *>( cur_token() )->symbol() == desiredSymbol
+			dynamic_cast<const token_symbol *>( cur_token() )->symbol() == desiredSymbol
 		)
 		return true;
 	return false;
@@ -102,7 +102,7 @@ bool parser::check_symbol( SymbolType desiredSymbol ){
 
 bool parser::check_operator( OperatorType desiredOperator ){
 	if	( 	check_type( Operator ) && 
-			reinterpret_cast<const token_operator *>( cur_token() )->operator_type() == desiredOperator
+			dynamic_cast<const token_operator *>( cur_token() )->operator_type() == desiredOperator
 		)
 		return true;
 	return false;
@@ -121,32 +121,35 @@ void parser::parse_symbol(SymbolType desiredSymbol){
 }
 
 ftype_t parser::parse_type(){
-	ftype_t tempIdent;
 
 	if( !check_type ( Type ) )
 		token_type_error( Type );
 		
+	ftype_t tempType = dynamic_cast<const token_type *>( cur_token() )->ftype();	
+	
 	next_token();
 	
-	return tempIdent;
+	return tempType;
 }
 
-fident_t parser::parse_reserved(){
-	fident_t tempIdent;
-
+ReservedWord parser::parse_reserved(){
 	if( !check_type ( Reserved ) )
 		token_type_error( Reserved );
-		
+	
+	ReservedWord tempWord = dynamic_cast<const token_reserved *>( cur_token() )->word();
+	
 	next_token();
 	
-	return tempIdent;
+	return tempWord;
 }
 
 exp_const * parser::parse_number(){
-	exp_const * tempNode;
-	
 	if( !check_type( Number ) )
 		token_type_error( Number );
+		
+	exp_const * tempNode = new exp_const();
+	
+	tempNode->set_val( dynamic_cast<const token_number *>( cur_token() )->number() );
 	
 	next_token();
 	
@@ -154,14 +157,19 @@ exp_const * parser::parse_number(){
 }
 
 exp_operator * parser::parse_operator( OperatorType desiredOperator ){
-	exp_operator * tempNode;
-	
 	if( !check_type( Operator) )
 		token_type_error( Operator );
 		
 	else if( !check_operator( desiredOperator ) )
 		operator_type_error( desiredOperator );
+
+
+	exp_operator * tempNode = new exp_operator();
 		
+	tempNode->set_optype( dynamic_cast<const token_operator *>( cur_token() )->operator_type() );
+	
+	//TODO: Need to set l_exp and r_exp still.	Might set in statement after return.	
+	
 	next_token();
 	
 	return tempNode;
@@ -169,12 +177,12 @@ exp_operator * parser::parse_operator( OperatorType desiredOperator ){
 
 
 fident_t parser::parse_name(){
-	fident_t tempIdent;
-	
 	if( !check_type( Name ) )
 		token_type_error( Name );
 	
 	//TODO:	Add check for reserved words, throw error if found.
+	
+	fident_t tempIdent = dynamic_cast<const token_name *>( cur_token() )->name();
 	
 	next_token();
 	
@@ -185,10 +193,10 @@ fident_t parser::parse_name(){
 //Parse Variable Declaration
 exp_declare * parser::parse_variable_declaration(){
 	exp_declare * tempNode;
-
-	parse_type();			//int
-	parse_symbol( Colon );	//:
-	parse_name();			//x
+	//  name()
+	tempNode->set_ftype( parse_type() );	//int
+	parse_symbol( Colon );					//:
+	tempNode->set_name( parse_name() );		//x
 	
 	if( !check_symbol( Semicolon ) ){
 		parse_operator( OpEquals );
@@ -201,6 +209,7 @@ exp_declare * parser::parse_variable_declaration(){
   	
 exp_declare ** parser::parse_parameter_list(){
 	//probs better to use vector<exp_declare *> here.
+	
 	exp_declare ** tempNodeAr = new exp_declare*[1];
 	tempNodeAr[0] = new exp_declare();
 
@@ -221,7 +230,6 @@ exp_base * parser::parse_name_statement(){
 	exp_base * tempNode;
 
 	//Either Function Or Variable Assignment starts with a "Name" token
-	
 	parse_name();	//x
 	
 	//If it's a symbol, assume it's a function call.
