@@ -13,16 +13,22 @@
 #include "token_symbol.hpp"
 #include "token_number.hpp"
 #include "token_name.hpp"
+#include "fident_t.hpp"
+#include "ftype_t.hpp"
 
 #include <vector>
 
-/*
-#include "node_base.hpp"
-#include "node_exp.hpp"
-#include "node_function.hpp"
-#include "node_program.hpp"
-#include "node_seqnode.hpp"
-*/
+
+#include "exp_base.hpp"
+#include "exp_assign.hpp"
+#include "exp_call.hpp"
+#include "exp_const.hpp"
+#include "exp_declare.hpp"
+#include "exp_declarefunc.hpp"
+#include "exp_operator.hpp"
+#include "exp_return.hpp"
+#include "exp_var.hpp"
+
 
 class parser
 {
@@ -40,9 +46,6 @@ public:
 	//Grab the next token, set _tokenPos equal to it
 	void next_token();
 	
-	//Parse an entire function
-	void parse_function();
-	
 	bool check_symbol(SymbolType);
 	
 	bool check_operator(OperatorType);
@@ -53,40 +56,43 @@ public:
 	token_base * cur_token();
 	
 	//Parse a type token
-	void parse_type();
+	ftype_t parse_type();
 	
 	//Parse  a number
-	void parse_number();
+	exp_const * parse_number();
 	
 	//Parse a name
-  	void parse_name();
+  	fident_t parse_name();
   	
   	//Parse a reserved word
-  	void parse_reserved();
+  	fident_t parse_reserved();
   	
   	//Check the operator value of _lookAhead against parameter
-  	void parse_operator( OperatorType );
+  	exp_operator * parse_operator( OperatorType );
   	
   	//Check the symbol value of _lookAhead against parameter
 	void parse_symbol(SymbolType);
 	
   	//Parse a list of parameters in a function
-  	void parse_parameter_list();
+  	exp_declare ** parse_parameter_list();
   	
   	//Parse a statement that begins with a "name" token
-  	void parse_name_statement();
+  	exp_base * parse_name_statement();
   	
   	//Parse a statement that begins with a reserved word, namely "return"
-  	void parse_reserved_statement();
+  	exp_return * parse_reserved_statement();
   	
   	//Parse a single statement
-  	bool parse_statement();
+  	exp_base * parse_statement();
   	
   	//Parse the statements inside the body of a function
-  	void parse_statements();
+  	exp_base ** parse_statements();
+  	
+  	//Parse an entire function
+	exp_declarefunc * parse_function();
   	
   	//Parse a variable declaration
-  	void parse_variable_declaration();
+  	exp_declare * parse_variable_declaration();
   	
   	//Throw an error if unexpected result occurs
   	void token_type_error(TokenType);

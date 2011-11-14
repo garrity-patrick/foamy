@@ -200,7 +200,7 @@ void scanner::scan(void)
 				{
 					// Assignment operator
 					token_operator * tok = new token_operator();
-					tok->set_operator_type(Equals);
+					tok->set_operator_type(OpEquals);
 					_tokens.push_back(tok);
 					break;
 				}

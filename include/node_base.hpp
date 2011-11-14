@@ -10,7 +10,7 @@
 
 // possible types for the node object
 enum NodeType {
-  Error = -1,
+  NodeError = -1,
   Program = 0,
   Function = 1,
   Expression = 10
@@ -29,7 +29,7 @@ protected:
   
 public:
   // standard constructors, destructors
-  node_base(void) : _type(Error) { }
+  node_base(void) : _type(NodeError) { }
   node_base(NodeType t) : _type(t) { }
   node_base(const node_base& src) { this->operator=(src); }
   virtual ~node_base(void) { } 

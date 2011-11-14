@@ -56,6 +56,7 @@ public:
     _args = src._args;
     _rettype = src._rettype;
     _body = src._body;
+    return *this;
   }
 
   ~node_function(void)

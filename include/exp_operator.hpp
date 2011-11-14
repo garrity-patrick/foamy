@@ -7,15 +7,9 @@
 #define _EXP_OPERATOR_HPP_
 
 #include "exp_base.hpp"
+//Temporary fix to get around multiple enum declaration for OperatorType
+#include "token_operator.hpp"
 
-enum OperatorType {
-  OpError = -1,
-  EqualsEquals = 0,
-  Plus = 1,
-  Minus = 2,
-  Greater = 3,
-  Less = 4
-};
 
 class exp_operator : public exp_base
 {
@@ -27,13 +21,13 @@ protected:
 public:
   // constructors, destructors
   exp_operator() : exp_base() {
-    _exptype = Operator;
-    _optype = OpError;
+    _exptype = ExpOperator;
+    _optype = ErrorOperator;
     _lexp = _rexp = NULL;
   }
 
   exp_operator(exp_base* next, OperatorType op, exp_base* lexp, exp_base* rexp) : exp_base(next) {
-    _exptype = Operator;
+    _exptype = ExpOperator;
     _optype = op;  _lexp = lexp;  _rexp = rexp;
   }
   
@@ -70,8 +64,8 @@ public:
   virtual std::ostream& printExpHead(std::ostream& os) {
     os << "exp_operator ";
     switch(_optype){
-    case OpError: os << "Operator Type Error"; break;
-    case EqualsEquals: os << "=="; break;
+    case ErrorOperator: os << "Operator Type Error"; break;
+    case OpEquals: os << "=="; break;
     case Plus: os << "+"; break;
     case Minus: os << "-"; break;
     case Greater: os << ">"; break;

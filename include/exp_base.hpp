@@ -10,16 +10,17 @@
 #include "node_base.hpp"
 
 // possible expression types
+
 enum ExpType {
   ExpError = -1,
   Var = 0,
   Const = 1,
-  Operator = 10,
+  ExpOperator = 10,
   Declare = 11,
   DeclareFunc = 12,
   Assign = 13,
   Call = 14,
-  Return = 15  
+  ExpReturn = 15  
 };
 
 
@@ -74,7 +75,7 @@ public:
     case DeclareFunc: os << "declarefunc"; break;
     case Assign: os << "assign"; break;
     case Call: os << "call"; break;
-    case Return: os << "return"; break;  
+    case ExpReturn: os << "return"; break;  
     default: os << "unfound type"; break;
     }
     return os;    
@@ -117,7 +118,7 @@ public:
 
     if(_next != NULL)
       {
-	os<<endl;
+	os<<std::endl;
 	_next->printRec(os, depth);
       }
     else {

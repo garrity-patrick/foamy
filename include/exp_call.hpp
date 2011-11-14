@@ -54,9 +54,9 @@ public:
   // recursively prints the members of an expression
   virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth=0) {
     
-    os<< endl;
+    os<< std::endl;
     print_spaces(os, depth+1); os << "Call: " << fident() << " ";
-    if(_args) os << endl;
+    if(_args) os << std::endl;
     if(_args) _args->printRec(os, depth+1);
     
     return os;

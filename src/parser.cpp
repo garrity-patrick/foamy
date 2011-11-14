@@ -36,7 +36,7 @@ const char * get_type_string(TokenType type){
 const char * get_operator_string(OperatorType type){
 	switch(type){
 		case ErrorOperator:	return "'ErrorOperator'";
-		case Equals:		return "'Equals'";
+		case OpEquals:		return "'Equals'";
 		case Plus:			return "'Plus'";
 		default:			return "'No-Matching-Operator'";
 	}
@@ -120,28 +120,42 @@ void parser::parse_symbol(SymbolType desiredSymbol){
 	next_token();
 }
 
-void parser::parse_type(){
+ftype_t parser::parse_type(){
+	ftype_t tempIdent;
+
 	if( !check_type ( Type ) )
 		token_type_error( Type );
 		
 	next_token();
+	
+	return tempIdent;
 }
 
-void parser::parse_reserved(){
+fident_t parser::parse_reserved(){
+	fident_t tempIdent;
+
 	if( !check_type ( Reserved ) )
 		token_type_error( Reserved );
 		
 	next_token();
+	
+	return tempIdent;
 }
 
-void parser::parse_number(){
+exp_const * parser::parse_number(){
+	exp_const * tempNode;
+	
 	if( !check_type( Number ) )
 		token_type_error( Number );
 	
 	next_token();
+	
+	return tempNode;
 }
 
-void parser::parse_operator( OperatorType desiredOperator ){
+exp_operator * parser::parse_operator( OperatorType desiredOperator ){
+	exp_operator * tempNode;
+	
 	if( !check_type( Operator) )
 		token_type_error( Operator );
 		
@@ -149,33 +163,47 @@ void parser::parse_operator( OperatorType desiredOperator ){
 		operator_type_error( desiredOperator );
 		
 	next_token();
+	
+	return tempNode;
 }
 
 
-void parser::parse_name(){
+fident_t parser::parse_name(){
+	fident_t tempIdent;
+	
 	if( !check_type( Name ) )
 		token_type_error( Name );
 	
 	//TODO:	Add check for reserved words, throw error if found.
 	
 	next_token();
+	
+	return tempIdent;
 }
 
 
 //Parse Variable Declaration
-void parser::parse_variable_declaration(){
+exp_declare * parser::parse_variable_declaration(){
+	exp_declare * tempNode;
+
 	parse_type();			//int
 	parse_symbol( Colon );	//:
 	parse_name();			//x
 	
 	if( !check_symbol( Semicolon ) ){
-		parse_operator( Equals );
+		parse_operator( OpEquals );
 		parse_number();
 	}
 	//No check for semicolon because this function is used with params as well.
+	
+	return tempNode;
 } 
   	
-void parser::parse_parameter_list(){
+exp_declare ** parser::parse_parameter_list(){
+	//probs better to use vector<exp_declare *> here.
+	exp_declare ** tempNodeAr = new exp_declare*[1];
+	tempNodeAr[0] = new exp_declare();
+
 	parse_symbol( LParen );
 	
 	while ( !check_symbol( RParen ) )
@@ -183,10 +211,15 @@ void parser::parse_parameter_list(){
 	
 	parse_symbol( RParen );
 	
+	return tempNodeAr;
 }
 
 
-void parser::parse_name_statement(){
+//May need to create separate functions for this to handle exp_call and 
+//~	exp_declare
+exp_base * parser::parse_name_statement(){
+	exp_base * tempNode;
+
 	//Either Function Or Variable Assignment starts with a "Name" token
 	
 	parse_name();	//x
@@ -201,13 +234,17 @@ void parser::parse_name_statement(){
 	}
 	//If it's an operator, assume it's an assignment operation.
 	else if( check_type( Operator ) ){
-		parse_operator( Equals );
+		parse_operator( OpEquals );
 		parse_number();	//Assume we're just doing like: x=5
 	}
 	
+	return tempNode;
+	
 }
 
-void parser::parse_reserved_statement(){
+exp_return * parser::parse_reserved_statement(){
+	exp_return * tempNode;
+		
 	//Only reserved word we have is "return" right now.
 	
 	parse_reserved();		//return
@@ -215,28 +252,31 @@ void parser::parse_reserved_statement(){
 	parse_name();			//[variable]
 	parse_symbol(RParen);	//)
 	
+	return tempNode;
 }
 
 //Return true if "return()" because that would be the last 
 //	~statement in the set of statements.  Will have to be more general later,
 //	~but for now this will work.
-bool parser::parse_statement(){
+exp_base * parser::parse_statement(){
+	exp_base * tempNode;
+
 	switch( cur_token()->type() ){
 		case Type:
 			//For now, only variable definitions will begin with type in a statement
 			parse_variable_declaration();	//x:int = 5;
 			parse_symbol( Semicolon );		//;
-			return false;
+			//return false;
 			break;
 		case Name:
 			parse_name_statement();			//x = 5;
 			parse_symbol( Semicolon );		//;
-			return false;
+			//return false;
 			break;
 		case Reserved:
 			parse_reserved_statement();		//return(5);
 			parse_symbol( Semicolon );
-			return true;
+			//return true;
 			break;
 		default:
 			std::cout << "Expected 'Type', 'Name', or 'Reserved Word' at beginning of statement." << 
@@ -245,20 +285,32 @@ bool parser::parse_statement(){
 			break;
 	}
 	
+	return tempNode;
+	
 }
 
-void parser::parse_statements(){
-	bool finished = false;
+//Return array of statements.  
+exp_base ** parser::parse_statements(){
+	//probs better to use a vector here.
+	exp_base ** tempNodeAr = new exp_base*[1];
+	tempNodeAr[0] = new exp_base();
+
+	//bool finished = false;
 	//As long as we haven't encountered an RBrace yet, keep parsing statements.
 	while( !check_symbol( RBrace ) ){
-		finished = parse_statement();
-		if( finished )
-			break;
+		parse_statement();
+		//finished = parse_statement();
+		//if( finished )
+		//	break;
 	}
+	
+	return tempNodeAr;
 		
 }
 
-void parser::parse_function(){
+exp_declarefunc * parser::parse_function(){
+	exp_declarefunc * tempNode;
+
 							//Example:
 	parse_type();			//	int
 	parse_symbol( Colon );	//	:
@@ -267,6 +319,8 @@ void parser::parse_function(){
 	parse_symbol( LBrace );	//	{
 	parse_statements();		//	return();
 	parse_symbol( RBrace );	//	}
+	
+	return tempNode;
 }
 
 

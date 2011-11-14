@@ -16,12 +16,12 @@ protected:
 public:
   // constructors, destructors
   exp_return() : exp_base() {
-    _exptype = Return;
+    _exptype = ExpReturn;
     _arg = 0;
   }
 
   exp_return(exp_base* next, exp_base* arg) : exp_base(next) {
-    _exptype = Return;
+    _exptype = ExpReturn;
     _arg = arg;
   }
 
@@ -44,12 +44,14 @@ public:
   // overriding function for printing
   virtual std::ostream& printExpHead(std::ostream& os) {
     os << "exp_return";
+    return os;
   }
 
   // overriding function for printing
   virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth) {
     os << endl;
     if(_arg) _arg->printRec(os, depth+1);
+    return os;
   }
 
 

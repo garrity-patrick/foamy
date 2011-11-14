@@ -59,11 +59,11 @@ public:
 
   virtual std::ostream& printExpMembers(std::ostream& os, unsigned depth=0) {
 
-    os << endl;
+    os << std::endl;
 
     if(_dest) _dest->printRec(os, depth+1);
     os << " = ";
-    os << endl;
+    os << std::endl;
     if(_src) _src->printRec(os, depth+1);
 
     return os;    
