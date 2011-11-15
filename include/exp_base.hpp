@@ -56,10 +56,12 @@ public:
       delete _next;
   }
   
-  // accessors
-  ExpType exptype() { return _exptype; }
-  void set_exptype(const ExpType w) { _exptype = w; }
-
+  	// accessors
+  	ExpType exptype() { return _exptype; }
+  	void set_exptype(const ExpType w) { _exptype = w; }
+	
+	exp_base * next(){ return _next; }
+	void set_next(exp_base * n){ _next = n; }	
 
 
   

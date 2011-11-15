@@ -31,6 +31,7 @@ public:
     init();
     mainFunction = src.mainFunction;
     _globals = src._globals;
+    return *this;
   }
   ~node_program(void)
   {

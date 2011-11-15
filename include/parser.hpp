@@ -17,8 +17,6 @@
 #include "fident_t.hpp"
 #include "ftype_t.hpp"
 
-#include <vector>
-
 #include "exp_base.hpp"
 #include "exp_assign.hpp"
 #include "exp_call.hpp"
@@ -28,6 +26,14 @@
 #include "exp_operator.hpp"
 #include "exp_return.hpp"
 #include "exp_var.hpp"
+
+#include "node_function.hpp"
+#include "node_base.hpp"
+#include "node_program.hpp"
+
+#include <vector>
+#include <iostream>
+#include <cstdlib>
 
 class parser
 {
@@ -40,7 +46,7 @@ public:
 	~parser();
 	
 	//Start the parsing process
-	void begin_parse();
+	node_program * begin_parse();
 	
 	//Grab the next token, set _tokenPos equal to it
 	void next_token();
@@ -73,7 +79,8 @@ public:
 	void parse_symbol(SymbolType);
 	
   	//Parse a list of parameters in a function
-  	exp_declare ** parse_parameter_list();
+  	vector <func_arg> * parse_parameter_list();
+  	
   	
   	//Parse a statement that begins with a "name" token
   	exp_base * parse_name_statement();
@@ -85,13 +92,16 @@ public:
   	exp_base * parse_statement();
   	
   	//Parse the statements inside the body of a function
-  	exp_base ** parse_statements();
+  	exp_base * parse_statements();
   	
   	//Parse an entire function
-	exp_declarefunc * parse_function();
+	node_function * parse_function();
   	
   	//Parse a variable declaration
-  	exp_declare * parse_variable_declaration();
+  	exp_base * parse_variable_declaration();
+  	
+  	//Do a variable assignment with this exp_declare
+  	exp_assign * parse_variable_assignment(fident_t);
   	
   	//Throw an error if unexpected result occurs
   	void token_type_error(TokenType);

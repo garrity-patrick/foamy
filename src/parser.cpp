@@ -1,6 +1,4 @@
 #include "parser.hpp"
-#include <iostream>
-#include <cstdlib>
 
 parser::parser( const std::vector<token_base *>* tokens ){
 	_tokens = *tokens;
@@ -150,6 +148,7 @@ exp_const * parser::parse_number(){
 	exp_const * tempNode = new exp_const();
 	
 	tempNode->set_val( dynamic_cast<const token_number *>( cur_token() )->number() );
+	tempNode->set_ftype( Int );
 	
 	next_token();
 	
@@ -191,59 +190,81 @@ fident_t parser::parse_name(){
 
 
 //Parse Variable Declaration
-exp_declare * parser::parse_variable_declaration(){
-	exp_declare * tempNode;
-	//  name()
-	tempNode->set_ftype( parse_type() );	//int
+exp_base * parser::parse_variable_declaration(){
+	exp_base * tempNode = new exp_declare();
+	dynamic_cast<exp_declare *>( tempNode )->set_ftype( parse_type() );	//int
 	parse_symbol( Colon );					//:
-	tempNode->set_name( parse_name() );		//x
+	dynamic_cast<exp_declare *>( tempNode )->set_name( parse_name() );		//x
 	
 	if( !check_symbol( Semicolon ) ){
 		parse_operator( OpEquals );
-		parse_number();
+		//Pass the variable declaration as an argument.  It will pass back the exp_assign
+		//~	with the declare as the dest and the number as src.
+		tempNode->set_next( parse_variable_assignment( dynamic_cast<exp_declare *>(tempNode)->name() ) );
 	}
 	//No check for semicolon because this function is used with params as well.
 	
 	return tempNode;
-} 
+}
   	
-exp_declare ** parser::parse_parameter_list(){
-	//probs better to use vector<exp_declare *> here.
+vector <func_arg> * parser::parse_parameter_list(){
+	vector<func_arg> * funcArgs = new vector<func_arg>();
 	
-	exp_declare ** tempNodeAr = new exp_declare*[1];
-	tempNodeAr[0] = new exp_declare();
-
 	parse_symbol( LParen );
 	
-	while ( !check_symbol( RParen ) )
-		parse_variable_declaration();
+	exp_declare * tempDeclare;
+	func_arg * tempArg;
+	while ( !check_symbol( RParen ) ){
+		//TODO: May need to rework this.  Args are variable declarations.
+	
+		tempDeclare = dynamic_cast<exp_declare *>( parse_variable_declaration() );
+		tempArg = new func_arg( tempDeclare->ftype(),tempDeclare->name() );
+		funcArgs->push_back( *tempArg );
+	}
 	
 	parse_symbol( RParen );
 	
-	return tempNodeAr;
+	return funcArgs;
+}
+
+exp_assign * parser::parse_variable_assignment(fident_t varName){
+	exp_assign * tempNode = new exp_assign();
+
+	exp_var * varNode = new exp_var();
+	varNode->set_name( varName );
+	
+	tempNode->set_dest( varNode );
+	//For now the source will only be numbers
+	tempNode->set_src( parse_number() );
+	
+	return tempNode;
 }
 
 
 //May need to create separate functions for this to handle exp_call and 
 //~	exp_declare
 exp_base * parser::parse_name_statement(){
-	exp_base * tempNode;
-
+	exp_base * tempNode = new exp_base();
+	
 	//Either Function Or Variable Assignment starts with a "Name" token
-	parse_name();	//x
+	fident_t statementName = parse_name();
 	
 	//If it's a symbol, assume it's a function call.
 	if( check_symbol( LParen ) ){
 		
 		parse_symbol( LParen );		//	(
-		parse_parameter_list();		//	[args]
+		//Maybe change to parse_statement to allow for: return(x + 5);
+		//TODO: Change to below line after it's sorted whether to use exp_base * or vector<func_args>
+		//dynamic_cast<exp_call *>( tempNode )->set_args( parse_parameter_list() );
+		parse_parameter_list();
 		parse_symbol( RParen );		//	)
-		
+	
 	}
 	//If it's an operator, assume it's an assignment operation.
 	else if( check_type( Operator ) ){
 		parse_operator( OpEquals );
-		parse_number();	//Assume we're just doing like: x=5
+		
+		tempNode = parse_variable_assignment( statementName );
 	}
 	
 	return tempNode;
@@ -251,14 +272,18 @@ exp_base * parser::parse_name_statement(){
 }
 
 exp_return * parser::parse_reserved_statement(){
-	exp_return * tempNode;
-		
+	exp_return * tempNode = new exp_return();
+	exp_var * tempVar = new exp_var();
 	//Only reserved word we have is "return" right now.
 	
-	parse_reserved();		//return
-	parse_symbol(LParen);	//(
-	parse_name();			//[variable]
-	parse_symbol(RParen);	//)
+	parse_reserved();					//return
+	parse_symbol(LParen);				//(
+	//TODO: Change to allow for parse_statement parsing.
+	
+	tempVar->set_name( parse_name() );	//[variable]
+	tempNode->set_arg( tempVar );
+	
+	parse_symbol(RParen);				//)
 	
 	return tempNode;
 }
@@ -272,17 +297,17 @@ exp_base * parser::parse_statement(){
 	switch( cur_token()->type() ){
 		case Type:
 			//For now, only variable definitions will begin with type in a statement
-			parse_variable_declaration();	//x:int = 5;
+			tempNode = parse_variable_declaration();	//x:int = 5;
 			parse_symbol( Semicolon );		//;
 			//return false;
 			break;
 		case Name:
-			parse_name_statement();			//x = 5;
+			tempNode = parse_name_statement();			//x = 5;
 			parse_symbol( Semicolon );		//;
 			//return false;
 			break;
 		case Reserved:
-			parse_reserved_statement();		//return(5);
+			tempNode = parse_reserved_statement();		//return(5);
 			parse_symbol( Semicolon );
 			//return true;
 			break;
@@ -297,42 +322,42 @@ exp_base * parser::parse_statement(){
 	
 }
 
-//Return array of statements.  
-exp_base ** parser::parse_statements(){
-	//probs better to use a vector here.
-	exp_base ** tempNodeAr = new exp_base*[1];
-	tempNodeAr[0] = new exp_base();
+exp_base * parser::parse_statements(){
+	exp_base * topNode = new exp_base();
+	exp_base * curNode = topNode;
 
-	//bool finished = false;
 	//As long as we haven't encountered an RBrace yet, keep parsing statements.
 	while( !check_symbol( RBrace ) ){
-		parse_statement();
-		//finished = parse_statement();
-		//if( finished )
-		//	break;
+		curNode->set_next( parse_statement() );
+		curNode = curNode->next();
 	}
 	
-	return tempNodeAr;
+	return topNode;
 		
 }
 
-exp_declarefunc * parser::parse_function(){
-	exp_declarefunc * tempNode;
-
+node_function * parser::parse_function(){
+	exp_declarefunc * tempDec = new exp_declarefunc();
+	node_function * tempFunc = new node_function();
 							//Example:
-	parse_type();			//	int
+	tempFunc->set_rettype( parse_type() );			//	int
 	parse_symbol( Colon );	//	:
-	parse_name();			//	main
-	parse_parameter_list();	//	()
+	tempFunc->set_name( parse_name() );			//	main
+	tempFunc->set_args( *parse_parameter_list() );	//	()
 	parse_symbol( LBrace );	//	{
-	parse_statements();		//	return();
+	tempFunc->set_body( parse_statements() );		//	return();
 	parse_symbol( RBrace );	//	}
 	
-	return tempNode;
+	tempDec->set_func( tempFunc );
+	
+	return tempFunc;
 }
 
 
-void parser::begin_parse(){
-	parse_function();
+node_program * parser::begin_parse(){
+	node_program * prog = new node_program();
+	prog->set_main( parse_function() );
+	
+	return prog;
 }
   	
