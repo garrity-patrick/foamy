@@ -143,8 +143,14 @@ int main(int argc, char ** argv)
 	}
 	
 	parser p ( s.tokens() );
-	p.begin_parse();
-	cout << "File Parsed Successfuly" << endl;
+	node_program * prog = p.begin_parse();
+	node_function * func = dynamic_cast<node_function *>(prog->main());
+	
+	cout << endl << "[--File Parsed Successfuly--]" << endl << endl;
+	
+	prog->printRec(cout,0);
+	cout << endl;
+	func->printRec(cout,0);
 	
 	return 0;
 }

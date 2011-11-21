@@ -7,41 +7,51 @@
 #define _EXP_DECLARE_HPP_
 
 #include "exp_base.hpp"
-#include "exp_var.hpp"
+#include "fident_t.hpp"
+#include "ftype_t.hpp"
 
 class exp_declare : public exp_base
 {
 protected:
-  exp_var* _var;
+  ftype_t _ftype;
+  fident_t _name;
   
 public:
   // constructors, destructors
   exp_declare() : exp_base() {
     _exptype = Declare;
-    _var = NULL;
   }
 
-  exp_declare(exp_base* next, exp_var* var) : exp_base(next) {
+  exp_declare(exp_base* next, ftype_t type, fident_t name) : exp_base(next) {
     _exptype = Declare;
-    _var = var;
+    _ftype = type;
+    _name = name;
   }
   
-  exp_declare(exp_var* v) : exp_base() {
+  exp_declare(ftype_t type, fident_t name) : exp_base() {
     _exptype = Declare;
-    _var = v;
+    _ftype = type;
+    _name = name;
   }
   
   exp_declare(const exp_declare& src) : exp_base(src) {
-    _var = src._var;
+    _ftype = src._ftype;
+    _name = src._name;
   }
   
-  ~exp_declare() : ~exp_base() { }
+  ~exp_declare() { }
   
   // accessors
-  exp_var* var() { return _var; }
-  void set_var(const exp_var* v) {
-    if(_var) delete _var;
-    _var = v;
+  ftype_t ftype() { return _ftype; }
+  void set_ftype(const ftype_t type) { _ftype = type; }
+  fident_t name() { return _name; }
+  void set_name(const fident_t name) { _name = name; }
+  
+
+  // functions for printing
+  virtual std::ostream& printExpHead(std::ostream& os) {
+    os << "exp_declare " << _ftype << " " << _name;
+    return os;
   }
   
 };

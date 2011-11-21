@@ -8,9 +8,13 @@
 
 #include "token_base.hpp"
 
-enum OperatorType
-{
-	ErrorOperator=-1,Equals=0,Plus=1
+enum OperatorType {
+  ErrorOperator = -1,
+  OpEquals = 0,
+  Plus = 1,
+  Minus = 2,
+  Greater = 3,
+  Less = 4
 };
 
 class token_operator : public token_base
