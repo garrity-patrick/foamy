@@ -42,4 +42,52 @@ void codegen::generate()
 void codegen::gen(node_base * tree)
 {
 	if (tree == 0) return;
+	// assert: tree exits.
+	
+	switch(tree->type())  // all cases except Expression will return from this function
+	  {
+	  case NodeError:
+	    return;
+	  case Program:
+	    return;
+	  case Function:
+	    return;
+	    
+	  case Expression:
+	    // For expressions, break out to the next switch statement
+	    break;
+	    
+	  default:
+	    return;    
+	  }
+	
+	// assert: this is an expression node
+	exp_base* exp = dynamic_cast<exp_base*> (tree);  // make ourselves an Expression object
+
+	switch(exp->exptype())
+	  {
+	  case ExpError:
+	    break;
+	  case Var:
+	    break;
+	  case Const:
+	    break;
+	  case ExpOperator:
+	    break;
+	  case Declare:
+	    break;
+	  case DeclareFunc:
+	    break;
+	  case Assign:
+	    break;
+	  case Call:
+	    break;
+	  case ExpReturn:
+	    break;
+	    
+
+	  default:
+	    break;
+	  }
+
 }

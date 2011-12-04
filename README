@@ -1,3 +1,13 @@
-This is a readme file.
 
-123445
+The foamy Project
+
+A toy language written for Fall 2011 Programming Languages class.
+
+Sample code:
+
+int:main()
+{
+	int:x = 2;
+	int:y = 3;
+	return(x);
+}
