@@ -101,6 +101,7 @@ void codegen::gen(node_base * tree)
 		builder.CreateStore(initial_value, Alloca);
 		
 		_vars[var_name] = Alloca;
+		gen(exp->next());
 		break;
 		
 	case DeclareFunc:
