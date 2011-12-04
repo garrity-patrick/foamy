@@ -14,6 +14,8 @@
 #include <llvm/LLVMContext.h>
 
 #include <map>
+#include <stack>
+#include <pair>
 
 class codegen
 {
@@ -23,6 +25,7 @@ private:
 	std::string _name;
 	
 	std::map<std::string, AllocaInst *> _vars;
+	std::stack<std::pair<BasicBlock *, IRBuilder<> > > _blocks;
 
 public:
 	codegen(void);
