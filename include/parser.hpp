@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-#ifndef _PARSER_HPP_
-#define _PARSER_HPP_
-
-class parser
-{
-};
-
-#endif
-=======
 // @author Chris Cornelius, Patrick Garrity, Jonathan Sandness                  
 // Created 11/07/2011                                                           
 // Foamy (toy language project) - ProLang course, Fall 2011
@@ -124,5 +114,3 @@ public:
 
 
 #endif // _PARSER_H_
-
->>>>>>> 8c72c2f7454d662b45ad0d0cfebe2abca98c2e9c
