@@ -204,7 +204,7 @@ exp_base * parser::parse_variable_declaration(){
 	}
 	//No check for semicolon because this function is used with params as well.
 	
-	return tempNode;
+	return tempNode->next();
 }
   	
 vector <func_arg> * parser::parse_parameter_list(){
@@ -263,9 +263,11 @@ exp_base * parser::parse_name_statement(){
 	//If it's an operator, assume it's an assignment operation.
 	else if( check_type( Operator ) ){
 		parse_operator( OpEquals );
-		
+		std::cout << "IN HERE STUFF" << std::endl;
 		tempNode = parse_variable_assignment( statementName );
 	}
+	
+	std::cout << "Other One Here" << std::endl;
 	
 	return tempNode;
 	
@@ -293,7 +295,6 @@ exp_return * parser::parse_reserved_statement(){
 //	~but for now this will work.
 exp_base * parser::parse_statement(){
 	exp_base * tempNode;
-
 	switch( cur_token()->type() ){
 		case Type:
 			//For now, only variable definitions will begin with type in a statement
@@ -347,6 +348,8 @@ node_function * parser::parse_function(){
 	parse_symbol( LBrace );	//	{
 	tempFunc->set_body( parse_statements() );		//	return();
 	parse_symbol( RBrace );	//	}
+	
+	
 	
 	tempDec->set_func( tempFunc );
 	
