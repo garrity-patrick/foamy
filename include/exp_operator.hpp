@@ -64,7 +64,8 @@ public:
   virtual std::ostream& printExpHead(std::ostream& os) {
     os << "exp_operator ";
     switch(_optype){
-    case ErrorOperator: os << "Operator Type Error"; break;
+    case ErrorOperator: os << "+"; break;
+    //case ErrorOperator: os << "Operator Type Error"; break;
     case OpEquals: os << "=="; break;
     case Plus: os << "+"; break;
     case Minus: os << "-"; break;

@@ -9,11 +9,17 @@ parser::~parser(){
 	//Destroy yourself
 };
 
-bool verbose = true;
+bool verbose = false;
+
+int parser::tokens_left(){
+
+	return _tokens.size() - _tokenPos;
+	
+}
 
 //Accessor for _look_ahead, allows for easier throwing of EOF errors.
 token_base * parser::cur_token(){
-	if( (unsigned int)_tokenPos == _tokens.size() ){
+	if( tokens_left() == 0 ){
 		std::cout << "Unexpected End Of File" << std::endl;
 		exit(1);
 	}
@@ -257,43 +263,64 @@ vector <func_arg> * parser::parse_parameter_list(){
 	return funcArgs;
 }
 
+exp_call * parser::parse_function_call(fident_t statementName){
+
+	if(verbose)
+		std::cout << "Parse Function Call" << std::endl;
+	exp_call * ret_var = new exp_call();
+		
+	dynamic_cast<exp_call *>( ret_var )->set_fident( statementName ); 
+	//Maybe change to parse_statement to allow for: return(x + 5);
+	//TODO: Change to below line after it's sorted whether to use exp_base * or vector<func_args>
+	//dynamic_cast<exp_call *>( tempNode )->set_args( parse_parameter_list() );
+	
+	//dynamic_cast<exp_call *>( ret_var )->set_args(  );
+	parse_parameter_list();
+	
+	return ret_var;
+}
+
 //exp_base for now...I see problems returning a generic type like this...
 exp_base * parser::parse_right_assignment(){
 
 	if(verbose)
 		std::cout << "Parse Right Assignment" << std::endl;
 
-	std::cout << "Here .1" << std::endl;
 	exp_base * ret_var;
+	exp_base * ret_var2;
 	//Will not handle function call for now.
 	if( check_type(Name) ){
-		//Assume variable
-		ret_var = new exp_var();
 		fident_t tempIdent = parse_name();
-		dynamic_cast<exp_var *>( ret_var )->set_name( tempIdent );
+		
+		//If it's an LParen, they're doing a function call.
+		if( check_symbol( LParen ) ){
+			ret_var = parse_function_call(tempIdent);
+		}
+		else{
+			//Assume variable
+			ret_var = new exp_var();
+			dynamic_cast<exp_var *>( ret_var )->set_name( tempIdent );
+		}
 	}
 	//Otherwise assume it's a number
 	else{
 		ret_var = parse_number();
 		//dynamic_cast<const exp_const *>( ret_var )->set_val( parse_number() );
 	}
-	//Add check for exp_call
 	
 	if( check_symbol(Semicolon) ){
-		std::cout << "Here 1" << std::endl;
-		parse_symbol(Semicolon);
+		//Don't actually parse the Semicolon, that happens below.
 		return ret_var;
 	}
 	//Otherwise assume you want a  "+"
 	else{
-		std::cout << "Here 2" << std::endl;
 		parse_operator(Plus);
 		
-		exp_operator * ret_var2 = new exp_operator();
+		ret_var2 = new exp_operator();
 		//Set the left side equal to what we parsed above
-		dynamic_cast<const exp_operator *>( ret_var2 )->set_lexp( ret_var );
+		dynamic_cast<exp_operator *>( ret_var2 )->set_lexp( ret_var );
 		//Recur on the right side
-		dynamic_cast<const exp_operator *>( ret_var2 )->set_rexp( parse_right_assignment() );
+		dynamic_cast<exp_operator *>( ret_var2 )->set_rexp( parse_right_assignment() );
 		
 		return ret_var2;
 	}
@@ -313,7 +340,6 @@ exp_assign * parser::parse_variable_assignment(fident_t varName){
 	tempNode->set_dest( varNode );
 	
 	tempNode->set_src( parse_right_assignment() );
-	
 	return tempNode;
 }
 
@@ -324,7 +350,7 @@ exp_base * parser::parse_name_statement(){
 	if(verbose)
 		std::cout << "Parse Name Statement" << std::endl;
 
-	exp_base * tempNode = new exp_base();
+	exp_base * ret_var = new exp_base();
 	
 	//Either Function Or Variable Assignment starts with a "Name" token
 	fident_t statementName = parse_name();
@@ -332,25 +358,20 @@ exp_base * parser::parse_name_statement(){
 	//If it's a symbol, assume it's a function call.
 	if( check_symbol( LParen ) ){
 		
-		parse_symbol( LParen );		//	(
-		//Maybe change to parse_statement to allow for: return(x + 5);
-		//TODO: Change to below line after it's sorted whether to use exp_base * or vector<func_args>
-		//dynamic_cast<exp_call *>( tempNode )->set_args( parse_parameter_list() );
-		parse_parameter_list();
-		parse_symbol( RParen );		//	)
+		ret_var = parse_function_call(statementName);
 	
 	}
 	//If it's an operator, assume it's an assignment operation.
 	else if( check_type( Operator ) ){
 		parse_operator( OpEquals );
-		tempNode = parse_variable_assignment( statementName );
+		ret_var = parse_variable_assignment( statementName );
 	}
 	else{
 		//Otherwise assume you want a semicolon
 		parse_symbol(Semicolon);
 	}
 	
-	return tempNode;
+	return ret_var;
 	
 }
 
@@ -389,7 +410,7 @@ exp_base * parser::parse_statement(){
 			//exp_base * parentNode = tempNode;
 			//For now, only variable definitions will begin with type in a statement
 			tempNode = parse_variable_declaration();	//x:int = 5;
-			//parse_symbol( Semicolon );		//;
+			parse_symbol( Semicolon );		//;
 			//return false;
 			break;
 		case Name:
@@ -462,7 +483,18 @@ node_function * parser::parse_function(){
 
 node_program * parser::begin_parse(){
 	node_program * prog = new node_program();
-	prog->set_main( parse_function() );
+	node_function * tempFunction;
+	
+	while( tokens_left() > 0){
+		tempFunction = parse_function();
+		
+		if( tokens_left() > 0 )
+			prog->globalsVector().push_back( tempFunction );
+		else{
+			prog->set_main( tempFunction );
+			break;
+		}
+	}
 	
 	return prog;
 }

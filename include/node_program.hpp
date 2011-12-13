@@ -42,7 +42,7 @@ public:
   // accessor methods
   vector<node_base*>& globalsVector(void) { return _globals; }
   node_base* main() { return mainFunction; }
-  void set_main(node_base* m) { mainFunction = m;}
+  void set_main(node_base* m) { mainFunction = m; }
 
   // functions for printing
   virtual std::ostream& printShort(std::ostream& os) {
