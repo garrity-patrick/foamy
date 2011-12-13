@@ -9,6 +9,8 @@ parser::~parser(){
 	//Destroy yourself
 };
 
+bool verbose = true;
+
 //Accessor for _look_ahead, allows for easier throwing of EOF errors.
 token_base * parser::cur_token(){
 	if( (unsigned int)_tokenPos == _tokens.size() ){
@@ -109,6 +111,9 @@ bool parser::check_operator( OperatorType desiredOperator ){
 
 //Functions to parse individual token types
 void parser::parse_symbol(SymbolType desiredSymbol){
+	if(verbose)
+		std::cout << "Parse Symbol" << std::endl;
+
 	if( !check_type( Symbol ) )
 		token_type_error( Symbol );
 		
@@ -119,6 +124,8 @@ void parser::parse_symbol(SymbolType desiredSymbol){
 }
 
 ftype_t parser::parse_type(){
+	if(verbose)
+		std::cout << "Parse Type" << std::endl;
 
 	if( !check_type ( Type ) )
 		token_type_error( Type );
@@ -131,6 +138,9 @@ ftype_t parser::parse_type(){
 }
 
 ReservedWord parser::parse_reserved(){
+	if(verbose)
+		std::cout << "Parse Reserved" << std::endl;
+
 	if( !check_type ( Reserved ) )
 		token_type_error( Reserved );
 	
@@ -142,6 +152,10 @@ ReservedWord parser::parse_reserved(){
 }
 
 exp_const * parser::parse_number(){
+
+	if(verbose)
+		std::cout << "Parse Number" << std::endl;
+	
 	if( !check_type( Number ) )
 		token_type_error( Number );
 		
@@ -156,6 +170,10 @@ exp_const * parser::parse_number(){
 }
 
 exp_operator * parser::parse_operator( OperatorType desiredOperator ){
+
+	if(verbose)
+		std::cout << "Parse Operator" << std::endl;
+
 	if( !check_type( Operator) )
 		token_type_error( Operator );
 		
@@ -176,6 +194,10 @@ exp_operator * parser::parse_operator( OperatorType desiredOperator ){
 
 
 fident_t parser::parse_name(){
+
+	if(verbose)
+		std::cout << "Parse Name" << std::endl;
+
 	if( !check_type( Name ) )
 		token_type_error( Name );
 	
@@ -191,6 +213,10 @@ fident_t parser::parse_name(){
 
 //Parse Variable Declaration
 exp_base * parser::parse_variable_declaration(){
+
+	if(verbose)
+		std::cout << "Parse Variable Declaration" << std::endl;
+
 	exp_base * tempNode = new exp_declare();
 	dynamic_cast<exp_declare *>( tempNode )->set_ftype( parse_type() );	//int
 	parse_symbol( Colon );					//:
@@ -204,10 +230,14 @@ exp_base * parser::parse_variable_declaration(){
 	}
 	//No check for semicolon because this function is used with params as well.
 	
-	return tempNode->next();
+	return tempNode;//->next();
 }
   	
 vector <func_arg> * parser::parse_parameter_list(){
+
+	if(verbose)
+		std::cout << "Parse Parameter List" << std::endl;
+
 	vector<func_arg> * funcArgs = new vector<func_arg>();
 	
 	parse_symbol( LParen );
@@ -227,23 +257,73 @@ vector <func_arg> * parser::parse_parameter_list(){
 	return funcArgs;
 }
 
+//exp_base for now...I see problems returning a generic type like this...
+exp_base * parser::parse_right_assignment(){
+
+	if(verbose)
+		std::cout << "Parse Right Assignment" << std::endl;
+
+	std::cout << "Here .1" << std::endl;
+	exp_base * ret_var;
+	//Will not handle function call for now.
+	if( check_type(Name) ){
+		//Assume variable
+		ret_var = new exp_var();
+		fident_t tempIdent = parse_name();
+		dynamic_cast<exp_var *>( ret_var )->set_name( tempIdent );
+	}
+	//Otherwise assume it's a number
+	else{
+		ret_var = parse_number();
+		//dynamic_cast<const exp_const *>( ret_var )->set_val( parse_number() );
+	}
+	//Add check for exp_call
+	
+	if( check_symbol(Semicolon) ){
+		std::cout << "Here 1" << std::endl;
+		parse_symbol(Semicolon);
+		return ret_var;
+	}
+	//Otherwise assume you want a  "+"
+	else{
+		std::cout << "Here 2" << std::endl;
+		parse_operator(Plus);
+		
+		exp_operator * ret_var2 = new exp_operator();
+		//Set the left side equal to what we parsed above
+		dynamic_cast<const exp_operator *>( ret_var2 )->set_lexp( ret_var );
+		//Recur on the right side
+		dynamic_cast<const exp_operator *>( ret_var2 )->set_rexp( parse_right_assignment() );
+		
+		return ret_var2;
+	}
+	
+}
+
 exp_assign * parser::parse_variable_assignment(fident_t varName){
+
+	if(verbose)
+		std::cout << "Parse Variable Assignment" << std::endl;
+
 	exp_assign * tempNode = new exp_assign();
 
 	exp_var * varNode = new exp_var();
 	varNode->set_name( varName );
 	
 	tempNode->set_dest( varNode );
-	//For now the source will only be numbers
-	tempNode->set_src( parse_number() );
+	
+	tempNode->set_src( parse_right_assignment() );
 	
 	return tempNode;
 }
 
-
 //May need to create separate functions for this to handle exp_call and 
 //~	exp_declare
 exp_base * parser::parse_name_statement(){
+
+	if(verbose)
+		std::cout << "Parse Name Statement" << std::endl;
+
 	exp_base * tempNode = new exp_base();
 	
 	//Either Function Or Variable Assignment starts with a "Name" token
@@ -263,17 +343,22 @@ exp_base * parser::parse_name_statement(){
 	//If it's an operator, assume it's an assignment operation.
 	else if( check_type( Operator ) ){
 		parse_operator( OpEquals );
-		std::cout << "IN HERE STUFF" << std::endl;
 		tempNode = parse_variable_assignment( statementName );
 	}
-	
-	std::cout << "Other One Here" << std::endl;
+	else{
+		//Otherwise assume you want a semicolon
+		parse_symbol(Semicolon);
+	}
 	
 	return tempNode;
 	
 }
 
 exp_return * parser::parse_reserved_statement(){
+
+	if(verbose)
+		std::cout << "Parse Reserved Statement" << std::endl;
+
 	exp_return * tempNode = new exp_return();
 	exp_var * tempVar = new exp_var();
 	//Only reserved word we have is "return" right now.
@@ -294,12 +379,17 @@ exp_return * parser::parse_reserved_statement(){
 //	~statement in the set of statements.  Will have to be more general later,
 //	~but for now this will work.
 exp_base * parser::parse_statement(){
+
+	if(verbose)
+		std::cout << "Parse Statement" << std::endl;
+
 	exp_base * tempNode;
 	switch( cur_token()->type() ){
 		case Type:
+			//exp_base * parentNode = tempNode;
 			//For now, only variable definitions will begin with type in a statement
 			tempNode = parse_variable_declaration();	//x:int = 5;
-			parse_symbol( Semicolon );		//;
+			//parse_symbol( Semicolon );		//;
 			//return false;
 			break;
 		case Name:
@@ -324,6 +414,10 @@ exp_base * parser::parse_statement(){
 }
 
 exp_base * parser::parse_statements(){
+
+	if(verbose)
+		std::cout << "Parse Statements" << std::endl;
+
 	exp_base * topNode = new exp_base();
 	exp_base * curNode = topNode;
 
@@ -331,6 +425,11 @@ exp_base * parser::parse_statements(){
 	while( !check_symbol( RBrace ) ){
 		curNode->set_next( parse_statement() );
 		curNode = curNode->next();
+		
+		//This fixes declaration and assign statement overlap.
+		if( curNode->next() != NULL ){
+				curNode = curNode->next();
+		}
 	}
 	
 	return topNode;
@@ -338,6 +437,10 @@ exp_base * parser::parse_statements(){
 }
 
 node_function * parser::parse_function(){
+
+	if(verbose)
+		std::cout << "Parse Function" << std::endl;
+
 	exp_declarefunc * tempDec = new exp_declarefunc();
 	node_function * tempFunc = new node_function();
 							//Example:

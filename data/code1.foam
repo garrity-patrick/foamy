@@ -1,6 +1,7 @@
 int:main()
 {
-	int:x = 2;
-	int:y = 3;
-	return(x);
+	int:x = 1;
+	int:y = x + 3 + 5 + 6 + 7;
+	x = y
+	return(y);
 }

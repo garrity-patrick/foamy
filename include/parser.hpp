@@ -81,7 +81,6 @@ public:
   	//Parse a list of parameters in a function
   	vector <func_arg> * parse_parameter_list();
   	
-  	
   	//Parse a statement that begins with a "name" token
   	exp_base * parse_name_statement();
   	
@@ -99,6 +98,9 @@ public:
   	
   	//Parse a variable declaration
   	exp_base * parse_variable_declaration();
+  	
+  	//Parse a variable assignment
+  	exp_base * parse_right_assignment();
   	
   	//Do a variable assignment with this exp_declare
   	exp_assign * parse_variable_assignment(fident_t);
