@@ -35,7 +35,7 @@ public:
 	void generate();
 
 private:
-	void gen(node_base * tree);
+	Value * gen(node_base * tree);
 };
 
 #endif

@@ -41,7 +41,7 @@ void codegen::generate()
 	_mod = 0;
 }
 
-void codegen::gen(node_base * tree)
+Value * codegen::gen(node_base * tree)
 {
 	if (tree == 0) return;
 	// assert: tree exits.
@@ -49,16 +49,16 @@ void codegen::gen(node_base * tree)
 	switch(tree->type())  // all cases except Expression will return from this function
 	{
 	case NodeError:
-		return;
+		return 0;
 	case Program:
-		return;
+		return 0;
 	case Function:
-		return;
+		return 0;
 	case Expression:
 		// For expressions, break out to the next switch statement
 		break;
 	default:
-		return;
+		return 0;
 	}
 	
 	// assert: this is an expression node
@@ -70,12 +70,67 @@ void codegen::gen(node_base * tree)
 		break;
 		
 	case Var:
-		break;
+		exp_var * v = dynamic_cast<exp_var *>(exp);
+		std::string vname = v->name();
+		
+		if (_vars.find(vname) == _vars.end())
+			return ErrorV("Unknown variable name.");
+		
+		AllocaInst * alloca = _vars[vname];
+		if (alloca == 0)
+			return ErrorV("Unknown variable name.");
+		
+		if (_blocks.empty())
+		{
+			// Error
+			return 0;
+		}
+		
+		IRBuilder<> builder = _blocks.top().second;
+		return builder.CreateLoad(alloca, vname.c_str());
 		
 	case Const:
-		break;
+		exp_const * c = dynamic_cast<exp_const *>(exp);
+		
+		// exp->next() should return 0
+		gen(exp->next());
+		return ConstantInt::get(getGlobalContext(), APInt(32, c->val(), true));
 		
 	case ExpOperator:
+		exp_operator * oper = dynamic_cast<exp_operator *>(exp);
+		Value * left = gen(oper->lexp());
+		Value * right = gen(oper->rexp());
+		
+		if (left == 0 || right == 0)
+		{
+			// Error
+			return 0;
+		}
+		
+		// Get the builder for the current scope.
+		// If there isn't one, error.
+		if (_blocks.empty())
+		{
+			// Error
+			return 0;
+		}
+		
+		IRBuilder<> builder = _blocks.top().second;
+		
+		switch (oper->optype())
+		{
+		case Plus:
+			return builder.CreateAdd(left, right);
+		case Minus:
+			return builder.CreateSub(left, right);
+		case Greater:
+			return builder.CreateICmpSGT(left, right);
+		case Less:
+			return builder.CreateICmpSLT(left, right);
+		default:
+			return ErrorV("Invalid binary operator.");
+		}
+		
 		break;
 		
 	case Declare:
@@ -102,6 +157,8 @@ void codegen::gen(node_base * tree)
 		
 		_vars[var_name] = Alloca;
 		gen(exp->next());
+		
+		return initial_value;
 		break;
 		
 	case DeclareFunc:
