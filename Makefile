@@ -6,7 +6,9 @@ LLVMFLAGS=`llvm-config --cxxflags --ldflags --libs core`
 OBJECTS=\
 build/scanner.o \
 build/parser.o \
-build/scanner_driver.o
+build/scanner_driver.o \
+build/foamyc.o \
+build/codegen.o
 
 default: bin/scanner
 
@@ -30,8 +32,15 @@ build/scanner_driver.o: src/scanner_driver.cpp
 build/codegen.o: src/codegen.cpp include/codegen.hpp include/vartable.hpp
 	$(CC) $(LLVMFLAGS) $(CFLAGS) src/codegen.cpp -o build/codegen.cpp
 
-bin/scanner: build/scanner_driver.o build/scanner.o build/parser.o build/codegen.o
-	$(CC) $(LLVMFLAGS) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o build/codegen.o
+build/foamyc.o: src/foamyc.cpp
+	$(CC) $(LLVMFLAGS) $(CFLAGS) src/foamyc.cpp -o build/foamyc.o
+
+bin/scanner: build/scanner_driver.o build/scanner.o build/parser.o
+	$(CC) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o
+
+bin/foamyc: build/foamyc.o build/scanner.o build/parser.o build/codegen.o
+	$(CC) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o
+
 
 
 
