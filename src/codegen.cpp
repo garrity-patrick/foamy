@@ -48,15 +48,35 @@ Value * codegen::gen(node_base * tree)
 	
 	switch(tree->type())  // all cases except Expression will return from this function
 	{
+	/*--------------------------------------------------------------------------
+	Error Node - Something went wrong.
+	--------------------------------------------------------------------------*/
 	case NodeError:
-		return 0;
+		return ErrorV("ERROR NODE");
+		
+	/*--------------------------------------------------------------------------
+	Program Node - Defines a program. There should be only one.
+	--------------------------------------------------------------------------*/
 	case Program:
 		return 0;
+	
+	/*--------------------------------------------------------------------------
+	Function Node - Defines a function, including its body.
+	--------------------------------------------------------------------------*/
 	case Function:
 		return 0;
+	
+	/*--------------------------------------------------------------------------
+	Expression Node - This case falls through to the different types of
+	expressions. These should always be within a function body.
+	--------------------------------------------------------------------------*/
 	case Expression:
 		// For expressions, break out to the next switch statement
 		break;
+		
+	/*--------------------------------------------------------------------------
+	Herp Derp - Something went abnormally wrong.
+	--------------------------------------------------------------------------*/
 	default:
 		return 0;
 	}
@@ -66,57 +86,73 @@ Value * codegen::gen(node_base * tree)
 
 	switch(exp->exptype())
 	{
+	/*--------------------------------------------------------------------------
+	Error Expression - Something went wrong.
+	--------------------------------------------------------------------------*/
 	case ExpError:
-		break;
+		return ErrorV("ERROR EXPRESSION");
 		
+	/*--------------------------------------------------------------------------
+	Variable Expression - Get the value of a variable.
+	--------------------------------------------------------------------------*/
 	case Var:
 		exp_var * v = dynamic_cast<exp_var *>(exp);
 		std::string vname = v->name();
 		
-		if (_vars.find(vname) == _vars.end())
-			return ErrorV("Unknown variable name.");
-		
-		AllocaInst * alloca = _vars[vname];
-		if (alloca == 0)
-			return ErrorV("Unknown variable name.");
-		
-		if (_blocks.empty())
+		// Get the variable, searching beginning with the most recent scope.
+		var * info = search_var(vname);
+		if (info == 0)
 		{
-			// Error
-			return 0;
+			return ErrorV("Unknown variable name.");
 		}
 		
-		IRBuilder<> builder = _blocks.top().second;
-		return builder.CreateLoad(alloca, vname.c_str());
+		// Get the instance of the variable.
+		AllocaInst * alloca = info->alloca();
+		if (alloca == 0)
+		{
+			return ErrorV("No alloca associated with variable!");
+		}
 		
+		// Evaluate the next expression.
+		gen(exp->next());
+		
+		// Generate code in the current scope.
+		return current_builder().CreateLoad(alloca, vname.c_str());
+		
+	/*--------------------------------------------------------------------------
+	Constant Expression - Does not actually generate code.
+	This case is used to get the (LLVM) value of a constant.
+	--------------------------------------------------------------------------*/
 	case Const:
 		exp_const * c = dynamic_cast<exp_const *>(exp);
 		
-		// exp->next() should return 0
+		// Evaluate the next expression.
 		gen(exp->next());
-		return ConstantInt::get(getGlobalContext(), APInt(32, c->val(), true));
 		
+		// Return the value associated with this constant.
+		return ConstantInt::get(getGlobalContext(), APInt(32, c->val(), true));
+	
+	/*--------------------------------------------------------------------------
+	(Binary) Operator Expression - Evaluate a binary expression.
+	For example, a+b. This case evaluates the left and right sides.
+	--------------------------------------------------------------------------*/
 	case ExpOperator:
 		exp_operator * oper = dynamic_cast<exp_operator *>(exp);
+		
+		// Evaluate the left- and- right expressions.
 		Value * left = gen(oper->lexp());
 		Value * right = gen(oper->rexp());
 		
 		if (left == 0 || right == 0)
 		{
 			// Error
-			return 0;
+			return ErrorV("Could not evaluate operands!");
 		}
 		
 		// Get the builder for the current scope.
-		// If there isn't one, error.
-		if (_blocks.empty())
-		{
-			// Error
-			return 0;
-		}
+		IRBuilder<> builder = current_builder();
 		
-		IRBuilder<> builder = _blocks.top().second;
-		
+		// Generate code based on the operator type.
 		switch (oper->optype())
 		{
 		case Plus:
@@ -133,6 +169,9 @@ Value * codegen::gen(node_base * tree)
 		
 		break;
 		
+	/*--------------------------------------------------------------------------
+	(Variable) Declaration Expression - Declare a new variable.
+	--------------------------------------------------------------------------*/
 	case Declare:
 		exp_declare * decl = dynamic_cast<exp_declare *>(exp);
 		std::string var_name = decl->name();
@@ -160,20 +199,64 @@ Value * codegen::gen(node_base * tree)
 		
 		return initial_value;
 		break;
-		
+	
+	/*--------------------------------------------------------------------------
+	(Function) Declaration Expression - Declare a local function.
+	--------------------------------------------------------------------------*/	
 	case DeclareFunc:
 		break;
 		
+	/*--------------------------------------------------------------------------
+	Assignment Expression - Assign a value to a variable.
+	--------------------------------------------------------------------------*/
 	case Assign:
 		break;
 		
+	/*--------------------------------------------------------------------------
+	Call Expression - Call a function. Returns the value of the called function.
+	--------------------------------------------------------------------------*/
 	case Call:
 		break;
 		
+	/*--------------------------------------------------------------------------
+	Return Expression - Return from the current function.
+	--------------------------------------------------------------------------*/
 	case ExpReturn:
 		break;
-		
+	
+	/*--------------------------------------------------------------------------
+	Herp Derp. Something went abnormally wrong.
+	--------------------------------------------------------------------------*/	
 	default:
 		break;
 	}
+}
+
+var * codegen::search_var(const std::string & name)
+{
+	list<scope>::iterator rit;
+	for (rit = _scope.rbegin(); rit != _scope.rend(); ++rit)
+	{
+		var * result = (*rit).get_variable(name);
+		if (result != 0) return result;
+	}
+	
+	return 0;
+}
+
+func * codegen::search_func(const std::string & name)
+{
+	list<scope>::iterator rit;
+	for (rit = _scope.rbegin(); rit != _scope.rend(); ++rit)
+	{
+		func * result = (*rit).get_function(name);
+		if (result != 0) return result;
+	}
+	
+	return 0;
+}
+
+IRBuilder<> current_builder(void) const
+{
+	return _scope.top().get_builder();
 }

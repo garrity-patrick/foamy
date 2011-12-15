@@ -2,6 +2,7 @@
 #define _CODEGEN_HPP_
 
 #include "node_base.hpp"
+#include "scope.hpp"
 
 #include <llvm/Module.h>
 #include <llvm/Function.h>
@@ -13,9 +14,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/LLVMContext.h>
 
-#include <map>
-#include <stack>
-#include <pair>
+#include <list>
 
 class codegen
 {
@@ -23,9 +22,7 @@ private:
 	node_base * _tree;
 	Module * _mod;
 	std::string _name;
-	
-	std::map<std::string, AllocaInst *> _vars;
-	std::stack<std::pair<BasicBlock *, IRBuilder<> > > _blocks;
+	std::list<scope> _scope;
 
 public:
 	codegen(void);
@@ -36,6 +33,9 @@ public:
 
 private:
 	Value * gen(node_base * tree);
+	var * search_var(const std::string & name);
+	func * search_func(const std::string & name);
+	IRBuilder<> current_builder(void) const;
 };
 
 #endif
