@@ -38,6 +38,7 @@ public:
   exp_base() {
     _exptype = ExpError;
     _next = NULL;
+    _type = ExpressionNode;
   }
   
   // construct from a pointer to next object
@@ -45,11 +46,13 @@ public:
   {
     _exptype = ExpError;
     _next = next;
+    _type = ExpressionNode;
   }
   
   exp_base(const exp_base& src) {
     _exptype = src._exptype;
     _next = src._next;
+    _type = ExpressionNode;
   }
   virtual ~exp_base() {
     if(_next)
@@ -72,7 +75,7 @@ public:
     case ExpError: os << "expression error"; break;
     case Var: os << "var"; break;
     case Const: os << "const"; break;
-    case Operator: os << "operator"; break;
+    case ExpOperator: os << "operator"; break;
     case Declare: os << "declare"; break;
     case DeclareFunc: os << "declarefunc"; break;
     case Assign: os << "assign"; break;

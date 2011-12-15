@@ -8,7 +8,7 @@
 
 enum TokenType
 {
-	Error=-1, Type=0, Reserved=1, Operator=2, Symbol=3, Number=4, Name=5
+	ErrorToken=-1, Type=0, Reserved=1, Operator=2, Symbol=3, Number=4, Name=5
 };
 
 class token_base
@@ -17,7 +17,7 @@ protected:
 	TokenType _type;
 
 public:
-	token_base(void) : _type(Error) { }
+	token_base(void) : _type(ErrorToken) { }
 	
 	token_base(TokenType t) : _type(t) { }
 	

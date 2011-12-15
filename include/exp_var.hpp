@@ -8,6 +8,7 @@
 
 #include "exp_base.hpp"
 #include "ftype_t.hpp"
+#include "fident_t.hpp"
 
 class exp_var : public exp_base
 {

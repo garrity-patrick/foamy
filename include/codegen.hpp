@@ -39,7 +39,7 @@ private:
 	Value * gen(node_base * tree);
 	var * search_var(const std::string & name);
 	func * search_func(const std::string & name);
-	IRBuilder<> current_builder(void) const;
+	IRBuilder<> * current_builder(void) const;
 };
 
 #endif

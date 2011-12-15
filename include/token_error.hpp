@@ -15,14 +15,14 @@ private:
 	std::string _message;
 
 public:
-	token_error(void) { _type = Error; }
+	token_error(void) { _type = ErrorToken; }
 	
-	token_error(const std::string & msg) : _message(msg) { _type = Error; }
+	token_error(const std::string & msg) : _message(msg) { _type = ErrorToken; }
 	
 	token_error(const token_error & other) : 
 		_message(other._message)
 	{
-		_type = Error;
+		_type = ErrorToken;
 	}
 	
 	virtual ~token_error(void) { }

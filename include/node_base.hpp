@@ -10,10 +10,10 @@
 
 // possible types for the node object
 enum NodeType {
-  NodeError = -1,
-  Program = 0,
-  Function = 1,
-  Expression = 10
+  ErrorNode = -1,
+  ProgramNode = 0,
+  FunctionNode = 1,
+  ExpressionNode = 10
 };
 
 inline void print_spaces(std::ostream& os, unsigned int num)
@@ -29,7 +29,7 @@ protected:
   
 public:
   // standard constructors, destructors
-  node_base(void) : _type(NodeError) { }
+  node_base(void) : _type(ErrorNode) { }
   node_base(NodeType t) : _type(t) { }
   node_base(const node_base& src) { this->operator=(src); }
   virtual ~node_base(void) { } 

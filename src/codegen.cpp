@@ -2,6 +2,14 @@
 #include "exp.hpp"
 #include "node.hpp"
 
+using namespace llvm;
+
+Value * ErrorV(const char * msg) 
+{
+	// TODO: Handle errors...
+	return 0;
+}
+
 codegen::codegen()
 {
 	_tree = 0;
@@ -24,7 +32,9 @@ codegen::~codegen()
 void codegen::generate()
 {
 	if (_mod != 0) delete _mod;
-	_mod = gen(_tree);
+	_mod = new Module("foamy_module", getGlobalContext());
+	//_mod = gen(_tree);
+	gen(_tree);
 	
 	if (_mod == 0)
 	{
@@ -43,7 +53,7 @@ void codegen::generate()
 
 Value * codegen::gen(node_base * tree)
 {
-	if (tree == 0) return;
+	if (tree == 0) return 0;
 	// assert: tree exits.
 	
 	switch(tree->type())  // all cases except Expression will return from this function
@@ -51,26 +61,26 @@ Value * codegen::gen(node_base * tree)
 	/*--------------------------------------------------------------------------
 	Error Node - Something went wrong.
 	--------------------------------------------------------------------------*/
-	case NodeError:
+	case ErrorNode:
 		return ErrorV("ERROR NODE");
 		
 	/*--------------------------------------------------------------------------
 	Program Node - Defines a program. There should be only one.
 	--------------------------------------------------------------------------*/
-	case Program:
+	case ProgramNode:
 		return 0;
 	
 	/*--------------------------------------------------------------------------
 	Function Node - Defines a function, including its body.
 	--------------------------------------------------------------------------*/
-	case Function:
+	case FunctionNode:
 		return 0;
 	
 	/*--------------------------------------------------------------------------
 	Expression Node - This case falls through to the different types of
 	expressions. These should always be within a function body.
 	--------------------------------------------------------------------------*/
-	case Expression:
+	case ExpressionNode:
 		// For expressions, break out to the next switch statement
 		break;
 		
@@ -96,6 +106,7 @@ Value * codegen::gen(node_base * tree)
 	Variable Expression - Get the value of a variable.
 	--------------------------------------------------------------------------*/
 	case Var:
+	{
 		exp_var * v = dynamic_cast<exp_var *>(exp);
 		std::string vname = v->name();
 		
@@ -117,13 +128,15 @@ Value * codegen::gen(node_base * tree)
 		gen(exp->next());
 		
 		// Generate code in the current scope.
-		return current_builder().CreateLoad(alloca, vname.c_str());
+		return current_builder()->CreateLoad(alloca, vname.c_str());
+	}
 		
 	/*--------------------------------------------------------------------------
 	Constant Expression - Does not actually generate code.
 	This case is used to get the (LLVM) value of a constant.
 	--------------------------------------------------------------------------*/
 	case Const:
+	{
 		exp_const * c = dynamic_cast<exp_const *>(exp);
 		
 		// Evaluate the next expression.
@@ -131,12 +144,14 @@ Value * codegen::gen(node_base * tree)
 		
 		// Return the value associated with this constant.
 		return ConstantInt::get(getGlobalContext(), APInt(32, c->val(), true));
+	}
 	
 	/*--------------------------------------------------------------------------
 	(Binary) Operator Expression - Evaluate a binary expression.
 	For example, a+b. This case evaluates the left and right sides.
 	--------------------------------------------------------------------------*/
 	case ExpOperator:
+	{
 		exp_operator * oper = dynamic_cast<exp_operator *>(exp);
 		
 		// Evaluate the left- and- right expressions.
@@ -150,74 +165,81 @@ Value * codegen::gen(node_base * tree)
 		}
 		
 		// Get the builder for the current scope.
-		IRBuilder<> builder = current_builder();
+		IRBuilder<> * builder = current_builder();
 		
 		// Generate code based on the operator type.
 		switch (oper->optype())
 		{
 		case Plus:
-			return builder.CreateAdd(left, right);
+			return builder->CreateAdd(left, right);
 		case Minus:
-			return builder.CreateSub(left, right);
+			return builder->CreateSub(left, right);
 		case Greater:
-			return builder.CreateICmpSGT(left, right);
+			return builder->CreateICmpSGT(left, right);
 		case Less:
-			return builder.CreateICmpSLT(left, right);
+			return builder->CreateICmpSLT(left, right);
 		default:
 			return ErrorV("Invalid binary operator.");
 		}
 		
-		break;
+		// Wut?
+		return 0;
+	}
 		
 	/*--------------------------------------------------------------------------
 	(Variable) Declaration Expression - Declare a new variable.
 	--------------------------------------------------------------------------*/
 	case Declare:
+	{
 		exp_declare * decl = dynamic_cast<exp_declare *>(exp);
 		std::string var_name = decl->name();
 		
-		map<std::string, AllocaInst *>::iterator it = _vars.find(var_name);
-		if (it != _vars.end())
+		var * info = search_var(var_name);
+		if (info != 0)
 		{
 			// Trying to re-declare a variable!
 			gen(exp->next());
-			break;
+			return 0;
 		}
 		
 		Value * initial_value = ConstantInt::get(getGlobalContext(), 
 												 APInt(32, 0, true));
 		
-		IRBuilder<> tmp(_blocks.top().first, _blocks.top().first->begin());
+		// Beginning of the block is where we want this builder.
+		IRBuilder<> tmp(_scope.back()->get_block(), _scope.back()->get_block()->begin());
 		AllocaInst * Alloca = tmp.CreateAlloca(Type::getInt32Ty(
 			getGlobalContext()), 0, var_name.c_str());
 		
-		builder = _blocks.top().second;
-		builder.CreateStore(initial_value, Alloca);
+		current_builder()->CreateStore(initial_value, Alloca);
 		
 		var * v = new var();
 		v->set_alloca(Alloca);
 		v->set_type(decl->ftype());
-		_scope.top()->insert_variable(var_name, v);
+		_scope.back()->insert_variable(var_name, v);
 		
 		gen(exp->next());
 		
 		return initial_value;
-		break;
+	}
 	
 	/*--------------------------------------------------------------------------
 	(Function) Declaration Expression - Declare a local function.
 	--------------------------------------------------------------------------*/	
 	case DeclareFunc:
-		Value * f = gen(fexp->func());
+	{
+		exp_declarefunc * dfexp = dynamic_cast<exp_declarefunc *>(exp);
+		Value * f = gen(dfexp->func());
 		gen(exp->next());
 		return f;
+	}
 		
 	/*--------------------------------------------------------------------------
 	Assignment Expression - Assign a value to a variable.
 	--------------------------------------------------------------------------*/
 	case Assign:
+	{
 		// get data on this transaction
-		exp_assign* ass = dynamic_cast<exp_assign*> (exp);
+		exp_assign* ass = dynamic_cast<exp_assign*>(exp);
 		string var_name;
 		
 		// guard to make sure this expression is well-formed
@@ -244,35 +266,42 @@ Value * codegen::gen(node_base * tree)
 		Value * new_value = gen(ass->src());
 		
 		// set up the object to generate code
-		current_builder().CreateStore(initial_value, Alloca);
+		current_builder()->CreateStore(new_value, alloca);
 		
 		// recur to move to next expression
 		gen(exp->next());
 		return new_value;
+	}
 		
 	/*--------------------------------------------------------------------------
 	Call Expression - Call a function. Returns the value of the called function.
 	--------------------------------------------------------------------------*/
 	case Call:
-		break;
+	{
+		return 0;
+	}
 		
 	/*--------------------------------------------------------------------------
 	Return Expression - Return from the current function.
 	--------------------------------------------------------------------------*/
 	case ExpReturn:
-		break;
+	{
+		return 0;
+	}
 	
 	/*--------------------------------------------------------------------------
 	Herp Derp. Something went abnormally wrong.
 	--------------------------------------------------------------------------*/	
 	default:
-		break;
+	{
+		return 0;
+	}
 	}
 }
 
 var * codegen::search_var(const std::string & name)
 {
-	list<scope>::iterator rit;
+	list<scope *>::reverse_iterator rit;
 	for (rit = _scope.rbegin(); rit != _scope.rend(); ++rit)
 	{
 		var * result = (*rit)->get_variable(name);
@@ -284,7 +313,7 @@ var * codegen::search_var(const std::string & name)
 
 func * codegen::search_func(const std::string & name)
 {
-	list<scope>::iterator rit;
+	list<scope *>::reverse_iterator rit;
 	for (rit = _scope.rbegin(); rit != _scope.rend(); ++rit)
 	{
 		func * result = (*rit)->get_function(name);
@@ -294,7 +323,7 @@ func * codegen::search_func(const std::string & name)
 	return 0;
 }
 
-IRBuilder<> current_builder(void) const
+IRBuilder<> * codegen::current_builder(void) const
 {
-	return _scope.top()->get_builder();
+	return _scope.back()->get_builder();
 }

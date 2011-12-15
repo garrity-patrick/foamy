@@ -37,7 +37,7 @@ protected:
   exp_base* _body;     // pointer to first element in body of function
   
   void init() {
-    _type = Function;
+    _type = FunctionNode;
     _rettype = Void;
     _body = NULL;
   }

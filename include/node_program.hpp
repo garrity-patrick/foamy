@@ -19,7 +19,7 @@ protected:
   
   void init() {
     mainFunction = NULL;
-    _type = Program;
+    _type = ProgramNode;
   }
   
 public:
