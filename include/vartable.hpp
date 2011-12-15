@@ -10,7 +10,19 @@
 
 #include <map>
 #include <string>
-#include <llvm/AllocaInst>
+#include <llvm/Module.h>
+#include <llvm/Function.h>
+#include <llvm/PassManager.h>
+#include <llvm/CallingConv.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Assembly/PrintModulePass.h>
+#include <llvm/Support/IRBuilder.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/LLVMContext.h>
+using llvm::AllocaInst;
+using std::map;
+using std::string;
+
 #include "ftype_t.hpp"
 
 // represents a variable in the variable table (everything about it but name)
@@ -21,16 +33,16 @@ private:
 
 public:
 	var() { _inst = NULL; _type = ErrorType; }
-	var(const AllocaInst* inst, const ftype_t type) { _inst = inst; _type = type; }
-	var(const var& src) {
+	var(AllocaInst* inst, const ftype_t type) { _inst = inst; _type = type; }
+	var(var& src) {
 		_inst = src._inst;
 		_type = src._type;
 	}
 	
 	AllocaInst* inst() { return _inst; }
-	void set_inst(const AllocaInst* inst) { _inst = inst; }
+	void set_inst(AllocaInst* inst) { _inst = inst; }
 	AllocaInst* alloca() { return _inst; }
-	void set_alloca(const AllocaInst* inst) { _inst = inst; }
+	void set_alloca(AllocaInst* inst) { _inst = inst; }
 		
 	ftype_t type() { return _type; }
 	void set_type(const ftype_t type) { _type = type; }
@@ -39,16 +51,17 @@ public:
 
 class vartable {
 protected:
+	// a map relating variable names to var object pointers
 	map<std::string, var*> _table;
 	
 public:
 	vartable();
-	vartable(const vartable& src) {  // deep copies!
+	vartable(vartable& src) {  // deep copies!
 		// add all
 		map<std::string, var*>::iterator it = src._table.begin();
 		while(it != src._table.end())
 		{
-			_table[(*it).first] = new var ((*it).second);
+			_table[(*it).first] = new var (*((*it).second));
 			it++;
 		}
 	}

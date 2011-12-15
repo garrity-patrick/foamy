@@ -45,6 +45,10 @@ public:
 	parser(const std::vector<token_base *> * tokens);
 	~parser();
 	
+	
+	//How many tokens remain to parse?
+	int tokens_left();
+	
 	//Start the parsing process
 	node_program * begin_parse();
 	
@@ -110,7 +114,7 @@ public:
   	void symbol_type_error(SymbolType);
   	void operator_type_error(OperatorType);
   	
-  	
+  	exp_call* parse_function_call(fident_t statementName);
   
 };
 

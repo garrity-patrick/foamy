@@ -1,6 +1,7 @@
 CC=g++
 CFLAGS=-Wall -Iinclude -c
 LFLAGS=-Wall
+LLVMFLAGS=`llvm-config --cxxflags --ldflags --libs core`
 
 OBJECTS=\
 build/scanner.o \
@@ -26,8 +27,12 @@ build/parser.o:	src/parser.cpp include/parser.hpp
 build/scanner_driver.o: src/scanner_driver.cpp
 	$(CC) $(CFLAGS) src/scanner_driver.cpp -o build/scanner_driver.o 
 
-bin/scanner: build/scanner_driver.o build/scanner.o build/parser.o
-	$(CC) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o
+build/codegen.o: src/codegen.cpp include/codegen.hpp include/vartable.hpp
+	$(CC) $(LLVMFLAGS) $(CFLAGS) src/codegen.cpp -o build/codegen.cpp
+
+bin/scanner: build/scanner_driver.o build/scanner.o build/parser.o build/codegen.o
+	$(CC) $(LLVMFLAGS) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o build/codegen.o
+
 
 
 bin/printer: .PHONY
