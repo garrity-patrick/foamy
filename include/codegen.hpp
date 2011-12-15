@@ -15,6 +15,10 @@
 #include <llvm/LLVMContext.h>
 
 #include <list>
+using std::list;
+using llvm::Module;
+using llvm::IRBuilder;
+using llvm::Value;
 
 class codegen
 {

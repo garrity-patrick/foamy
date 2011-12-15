@@ -91,7 +91,7 @@ public:
 		return 0;
 	}
 	
-	int insert(string var_name, var* v) {// adds the given var to the var table, returns 0 if successful
+	int insert(const string & var_name, var* v) {// adds the given var to the var table, returns 0 if successful
 		map<std::string, var*>::iterator it = _table.find(var_name);
 		if (it != _table.end()) // found variable -- duplicate addition!
 		{ return -1; }
@@ -103,7 +103,7 @@ public:
 	}
 	
 	
-	var* get(string var_name) {// returns 0 or the variable if found
+	var* get(const string & var_name) {// returns 0 or the variable if found
 		map<std::string, var*>::iterator it = _table.find(var_name);
 		if (it == _table.end()) // couldn't find
 		{ return 0; }

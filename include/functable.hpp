@@ -1,4 +1,4 @@
-#define _FUNCTABLE_HPP_
+#ifndef _FUNCTABLE_HPP_
 #define _FUNCTABLE_HPP_
 
 #include "ftype_t.hpp"
@@ -16,15 +16,35 @@
 #include <map>
 #include <string>
 
+using std::map;
+using std::string;
+
 class func
 {
 private:
-	Function * _llvmfunc;
+	llvm::Function * _llvmfunc;
 	ftype_t _type;
 	//args
 
 public:
 	func(void);
+};
+
+
+class functable {
+private:
+	map<string, func*> _table;
+	
+public:
+	functable();
+	functable(functable&);
+	
+	~functable();
+	
+	int modify(const string& func_name, func * v);
+	int insert(string func_name, func* v);
+	func* get(const string& func_name);
+	
 };
 
 #endif

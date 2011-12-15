@@ -14,6 +14,11 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/LLVMContext.h>
 
+using llvm::BasicBlock;
+using llvm::Block;
+using llvm::IRBuilder;
+using llvm::Value;
+
 #include <string>
 
 class scope
@@ -79,7 +84,7 @@ public:
 		_builder = IRBuilder<>(_block);
 	}
 	
-	void var * insert_variable(const std::string & name, var * v)
+	void insert_variable(const std::string & name, var * v)
 	{
 		if (_vars->get(name) != 0)
 		{
