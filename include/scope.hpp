@@ -78,6 +78,18 @@ public:
 		if (_block == 0) return;
 		_builder = IRBuilder<>(_block);
 	}
+	
+	void var * insert_variable(const std::string & name, var * v)
+	{
+		if (_vars->get(name) != 0)
+		{
+			_vars->modify(name, v);
+		}
+		else
+		{
+			_vars->insert(name, v);
+		}
+	}
 };
 
 #endif

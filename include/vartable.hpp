@@ -75,6 +75,22 @@ public:
 		}
 	}
 	
+	int modify(const string & var_name, var * v)
+	{
+		map<std::string, var*>::iterator it = _table.find(var_name);
+		if (it == _table.end())
+		{
+			_table[var_name] = v;
+		}
+		else
+		{
+			delete _table[var_name];
+			_table[var_name] = v;
+		}
+		
+		return 0;
+	}
+	
 	int insert(string var_name, var* v) {// adds the given var to the var table, returns 0 if successful
 		map<std::string, var*>::iterator it = _table.find(var_name);
 		if (it != _table.end()) // found variable -- duplicate addition!
