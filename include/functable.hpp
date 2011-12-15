@@ -2,6 +2,7 @@
 #define _FUNCTABLE_HPP_
 
 #include "ftype_t.hpp"
+#include "node_function.hpp"
 
 #include <llvm/Module.h>
 #include <llvm/Function.h>
@@ -15,6 +16,9 @@
 
 #include <map>
 #include <string>
+#include <list>
+
+using namespace llvm;
 
 using std::map;
 using std::string;
@@ -22,12 +26,16 @@ using std::string;
 class func
 {
 private:
-	llvm::Function * _llvmfunc;
+	Function * _llvmfunc;
 	ftype_t _type;
-	//args
+	vector<func_arg> _args;
 
 public:
 	func(void);
+	
+	void set_llvmfunc(Function * f) { _llvmfunc = f; }
+	void set_type(ftype_t t) { _type = t; }
+	void set_args(const vector<func_arg> & args) { _args = args; }
 };
 
 

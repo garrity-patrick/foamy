@@ -2,6 +2,11 @@
 #include "exp.hpp"
 #include "node.hpp"
 
+#include <llvm/Type.h>
+#include <llvm/DerivedTypes.h>
+
+#include <vector>
+
 using namespace llvm;
 
 Value * ErrorV(const char * msg) 
@@ -68,13 +73,98 @@ Value * codegen::gen(node_base * tree)
 	Program Node - Defines a program. There should be only one.
 	--------------------------------------------------------------------------*/
 	case ProgramNode:
-		return 0;
+	{
+		node_program * program = dynamic_cast<node_program *>(tree);
+		
+		// Create the top-level scope!
+		scope * top = new scope();
+		_scope.push_back(top);
+		
+		vector <node_base*> globals = program->globalsVector();
+		for (unsigned int i = 0; i < globals.size(); ++i)
+		{
+			gen(globals[i]);
+		}
+		
+		Value * result = gen(program->main());
+		
+		// Kill scope.
+		while (!_scope.empty())
+		{
+			scope * s = _scope.back(); delete s;
+			_scope.pop_back();
+		}
+		
+		return result;
+	}
 	
 	/*--------------------------------------------------------------------------
 	Function Node - Defines a function, including its body.
 	--------------------------------------------------------------------------*/
 	case FunctionNode:
-		return 0;
+	{
+		node_function * fnode = dynamic_cast<node_function *>(tree);
+		
+		// Just a little herp derp: We will assume unique functions...
+		std::string funcname = fnode->name();
+		unsigned int nargs = fnode->args().size();
+		std::vector<const llvm::Type *> argtypes;
+		for (unsigned int i = 0; i < nargs; ++i)
+		{
+			const llvm::Type * t = Type::getInt32Ty(getGlobalContext());
+			argtypes.push_back(t);
+		}
+		
+		// 1: Name of function
+		// 2: FunctionType
+		//		2.1: Argument Types
+		//		2.2: Is this a variable-argument function? NO.
+		Constant * fc = _mod->getOrInsertFunction(
+			funcname.c_str(),
+			FunctionType::get(Type::getInt32Ty(getGlobalContext()),
+			argtypes,
+			false));
+			
+		// DURR HURR HURR! We can assume this Constant * to be a Function *
+		Function * f = dynamic_cast<Function *>(fc);
+		f->setCallingConv(CallingConv::C);
+		BasicBlock * block = BasicBlock::Create(getGlobalContext(), "entry", f);
+		
+		// OK, we have our function. Now we need to add all sorts of code
+		// to it. First things first, push a new scope.
+		func * defn = new func();
+		defn->set_llvmfunc(f);
+		defn->set_type(Int);
+		defn->set_args(fnode->args());
+		
+		// Create the new scope.
+		scope * s = new scope(block);
+		s->make_builder();
+		
+		// Process the arguments
+		std::vector<Value *> args;
+		std::vector<func_arg> arginfo;
+		
+		unsigned int index = 0;
+		Function::arg_iterator arglist;
+		for (arglist = f->arg_begin(); arglist != f->arg_end();)
+		{
+			Value * v = arglist++;
+			v->setName(arginfo[index++].name.c_str());
+		}
+		
+		// Everything looks good, so add the function to the current scope.
+		_scope.back()->insert_function(funcname, defn);
+		
+		// Push the new scope.
+		_scope.push_back(s);
+		
+		// Generate the code of the function body.
+		// Herp derp, this currently won't work with arguments.
+		gen(fnode->body());
+		
+		return f;
+	}
 	
 	/*--------------------------------------------------------------------------
 	Expression Node - This case falls through to the different types of

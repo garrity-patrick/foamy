@@ -13,12 +13,15 @@
 #include <llvm/Support/IRBuilder.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/LLVMContext.h>
+#include <llvm/Type.h>
+#include <llvm/DerivedTypes.h>
 
 #include <list>
 using std::list;
 using llvm::Module;
 using llvm::IRBuilder;
 using llvm::Value;
+using llvm::Type;
 
 class codegen
 {

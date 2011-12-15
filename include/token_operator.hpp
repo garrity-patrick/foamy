@@ -23,14 +23,14 @@ private:
 	OperatorType _operator;
 
 public:
-	token_operator(void) : _operator(ErrorOperator) { _type = Operator; }
+	token_operator(void) : _operator(ErrorOperator) { _type = OperatorToken; }
 	
-	token_operator(OperatorType o) : _operator(o) { _type = Operator; }
+	token_operator(OperatorType o) : _operator(o) { _type = OperatorToken; }
 	
 	token_operator(const token_operator & other) :
 		_operator(other._operator)
 	{
-		_type = Operator;
+		_type = OperatorToken;
 	}
 	
 	virtual ~token_operator(void) { }

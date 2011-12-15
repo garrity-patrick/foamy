@@ -98,6 +98,18 @@ public:
 			_vars->insert(name, v);
 		}
 	}
+	
+	void insert_function(const std::string & name, func * f)
+	{
+		if (_funcs->get(name) != 0)
+		{
+			_funcs->modify(name, f);
+		}
+		else
+		{
+			_funcs->insert(name, f);
+		}
+	}
 };
 
 #endif

@@ -8,7 +8,7 @@
 
 enum TokenType
 {
-	ErrorToken=-1, Type=0, Reserved=1, Operator=2, Symbol=3, Number=4, Name=5
+	ErrorToken=-1, Type=0, Reserved=1, OperatorToken=2, Symbol=3, Number=4, Name=5
 };
 
 class token_base
