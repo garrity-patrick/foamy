@@ -5,6 +5,7 @@
 
 #include "scanner.hpp"
 #include "parser.hpp"
+#include "codegen.hpp"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -164,14 +165,20 @@ int main(int argc, char ** argv)
 	
 	// print out the abstract syntax tree
 	if( verbose ){
+		cout << "Abstract tree:" << endl;
 		prog->printRec(cout,0);
-		cout << endl;
+		cout << endl << "Main Function:" << endl;
 		func->printRec(cout,0);
 	}
 	
 	cout << endl;
 	
 	
+	// attempt to generate code from the tree
+	codegen CG(std::string("DERP"));
+	CG.set_tree(prog);
+	cout << "Generated code:" << endl;
+	CG.generate();
 	
 	return 0;
 }

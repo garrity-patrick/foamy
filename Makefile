@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall -Iinclude -c
+CFLAGS= -Iinclude -c
 LFLAGS=-Wall
 LLVMFLAGS=`llvm-config --cxxflags --ldflags --libs core`
 
@@ -10,12 +10,13 @@ build/scanner_driver.o \
 build/foamyc.o \
 build/codegen.o
 
-default: bin/scanner
+default: bin/foamyc
 
 .PHONY : clean
 clean:
 	rm -f build/*.o
 	rm -f bin/scanner
+	rm -f bin/foamyc
 
 .PHONY : compile
 compile: $(OBJECTS)
@@ -42,7 +43,7 @@ bin/scanner: build/scanner_driver.o build/scanner.o build/parser.o
 	$(CC) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o
 
 bin/foamyc: build/foamyc.o build/scanner.o build/parser.o build/codegen.o
-	$(CC) $(LFLAGS) -o bin/scanner build/scanner_driver.o build/scanner.o build/parser.o
+	$(CC) $(LLVMFLAGS) $(LFLAGS) -o bin/foamyc build/foamyc.o build/scanner.o build/parser.o build/codegen.o
 
 bin/winning: build/scanner.o build/parser.o build/codegen.o build/printer.o
 	$(CC) $(LLVMFLAGS) $(LFLAGS) -o bin/printer \
