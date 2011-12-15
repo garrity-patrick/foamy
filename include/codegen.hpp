@@ -22,7 +22,7 @@ private:
 	node_base * _tree;
 	Module * _mod;
 	std::string _name;
-	std::list<scope> _scope;
+	std::list<scope *> _scope;
 
 public:
 	codegen(void);

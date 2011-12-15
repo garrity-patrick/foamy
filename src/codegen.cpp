@@ -194,7 +194,11 @@ Value * codegen::gen(node_base * tree)
 		builder = _blocks.top().second;
 		builder.CreateStore(initial_value, Alloca);
 		
-		_vars[var_name] = Alloca;
+		var * v = new var();
+		v->set_alloca(Alloca);
+		v->set_type(decl->ftype());
+		_scope.top()->insert_variable(var_name, v);
+		
 		gen(exp->next());
 		
 		return initial_value;
@@ -204,13 +208,47 @@ Value * codegen::gen(node_base * tree)
 	(Function) Declaration Expression - Declare a local function.
 	--------------------------------------------------------------------------*/	
 	case DeclareFunc:
-		break;
+		Value * f = gen(fexp->func());
+		gen(exp->next());
+		return f;
 		
 	/*--------------------------------------------------------------------------
 	Assignment Expression - Assign a value to a variable.
 	--------------------------------------------------------------------------*/
 	case Assign:
-		break;
+		// get data on this transaction
+		exp_assign* ass = dynamic_cast<exp_assign*> (exp);
+		string var_name;
+		
+		// guard to make sure this expression is well-formed
+		if(ass->dest() != 0 && ass->src() != 0)
+		{
+			var_name = ass->dest()->name();
+		}
+		else 
+		{
+			return ErrorV("Badly formed assignment!");
+		}
+		
+		// check if variable is in variable table
+		var * info = search_var(var_name);
+		if (info == 0)
+		{
+			return ErrorV("[Assign] Unknown variable name.");
+		}
+		
+		// get the instance for our variable (look up by name, note that we don't have scoping yet)
+		AllocaInst * alloca = info->alloca();
+		
+		// find the value to assign to the variable.
+		Value * new_value = gen(ass->src());
+		
+		// set up the object to generate code
+		current_builder().CreateStore(initial_value, Alloca);
+		
+		// recur to move to next expression
+		gen(exp->next());
+		return new_value;
 		
 	/*--------------------------------------------------------------------------
 	Call Expression - Call a function. Returns the value of the called function.
@@ -237,7 +275,7 @@ var * codegen::search_var(const std::string & name)
 	list<scope>::iterator rit;
 	for (rit = _scope.rbegin(); rit != _scope.rend(); ++rit)
 	{
-		var * result = (*rit).get_variable(name);
+		var * result = (*rit)->get_variable(name);
 		if (result != 0) return result;
 	}
 	
@@ -249,7 +287,7 @@ func * codegen::search_func(const std::string & name)
 	list<scope>::iterator rit;
 	for (rit = _scope.rbegin(); rit != _scope.rend(); ++rit)
 	{
-		func * result = (*rit).get_function(name);
+		func * result = (*rit)->get_function(name);
 		if (result != 0) return result;
 	}
 	
@@ -258,5 +296,5 @@ func * codegen::search_func(const std::string & name)
 
 IRBuilder<> current_builder(void) const
 {
-	return _scope.top().get_builder();
+	return _scope.top()->get_builder();
 }
