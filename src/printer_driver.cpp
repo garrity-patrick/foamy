@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 using namespace std;
 
 #include "node_base.hpp"
@@ -20,6 +21,7 @@ using namespace std;
 #include "exp_declare.hpp"
 #include "exp_declarefunc.hpp"
 #include "exp_operator.hpp"
+//#include "codegen.hpp"
 
 int main()
 {
@@ -50,13 +52,17 @@ int main()
   
   node_program* p = new node_program;
   p->globalsVector().push_back((node_base*) f);
-  p->globalsVector().push_back((node_base*) f);
+  //p->globalsVector().push_back((node_base*) f);
   p->set_main(f);
   
 
   cout << endl;
   p->printRec(cout,0);
   cout << endl;cout << endl;cout << endl;
+  
+  //codegen CG(std::string("DERP"));
+  //CG.set_tree(p);
+  //CG.generate();
   
   
 }

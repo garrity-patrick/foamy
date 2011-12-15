@@ -36,6 +36,7 @@ public:
 	codegen(const std::string & name);
 	~codegen(void);
 	
+	void set_tree(node_base * derp) { _tree = derp; }
 	void generate();
 
 private:

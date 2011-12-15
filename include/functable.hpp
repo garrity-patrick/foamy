@@ -31,10 +31,17 @@ private:
 	vector<func_arg> _args;
 
 public:
-	func(void);
+	func(void)
+	{
+		_llvmfunc = 0;
+		_type = Int;
+	}
 	
+	Function * llvmfunc(void) { return _llvmfunc; }
 	void set_llvmfunc(Function * f) { _llvmfunc = f; }
+	ftype_t type(void) const { return _type; }
 	void set_type(ftype_t t) { _type = t; }
+	const vector<func_arg> & args(void) const { return _args; }
 	void set_args(const vector<func_arg> & args) { _args = args; }
 };
 
@@ -45,13 +52,32 @@ private:
 	
 public:
 	functable();
-	functable(functable&);
+	functable(const functable & other)
+	{
+		_table = other._table;
+	}
 	
-	~functable();
+	~functable()
+	{
+		// LEAK
+	}
 	
-	int modify(const string& func_name, func * v);
-	int insert(string func_name, func* v);
-	func* get(const string& func_name);
+	int modify(const string& func_name, func * v)
+	{
+		_table[func_name] = v;
+		return 0;
+	}
+	
+	int insert(string func_name, func* v)
+	{
+		_table[func_name] = v;
+		return 0;
+	}
+	
+	func* get(const string& func_name)
+	{
+		return _table[func_name];
+	}
 	
 };
 

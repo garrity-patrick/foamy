@@ -28,10 +28,10 @@ token_base * parser::cur_token(){
 
 const char * get_type_string(TokenType type){
 	switch(type){
-		case Error:		return "'Error'";
+		case ErrorToken:		return "'Error'";
 		case Type:		return "'Type'";
 		case Reserved:	return "'Reserved'";
-		case Operator:	return "'Operator'";
+		case OperatorToken:	return "'Operator'";
 		case Symbol:	return "'Symbol'";
 		case Number:	return "'Number'";
 		case Name:		return "'Name'";
@@ -107,7 +107,7 @@ bool parser::check_symbol( SymbolType desiredSymbol ){
 }
 
 bool parser::check_operator( OperatorType desiredOperator ){
-	if	( 	check_type( Operator ) && 
+	if	( 	check_type( OperatorToken ) && 
 			dynamic_cast<const token_operator *>( cur_token() )->operator_type() == desiredOperator
 		)
 		return true;
@@ -180,8 +180,8 @@ exp_operator * parser::parse_operator( OperatorType desiredOperator ){
 	if(verbose)
 		std::cout << "Parse Operator" << std::endl;
 
-	if( !check_type( Operator) )
-		token_type_error( Operator );
+	if( !check_type( OperatorToken) )
+		token_type_error( OperatorToken );
 		
 	else if( !check_operator( desiredOperator ) )
 		operator_type_error( desiredOperator );
@@ -362,7 +362,7 @@ exp_base * parser::parse_name_statement(){
 	
 	}
 	//If it's an operator, assume it's an assignment operation.
-	else if( check_type( Operator ) ){
+	else if( check_type( OperatorToken ) ){
 		parse_operator( OpEquals );
 		ret_var = parse_variable_assignment( statementName );
 	}
